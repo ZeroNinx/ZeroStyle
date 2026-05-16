@@ -98,7 +98,7 @@ return Database.IsOpen() ? ResolveImpl(Name) : Result<Path>::Err(MakeError(Error
 好的做法：
 
 ```cpp
-[[nodiscard]] Result<Path> ResolveAssetPath(StringView InName) const;
+NODISCARD Result<Path> ResolveAssetPath(StringView InName) const;
 ```
 
 不好的做法：
@@ -107,7 +107,7 @@ return Database.IsOpen() ? ResolveImpl(Name) : Result<Path>::Err(MakeError(Error
 Path Get(StringView Name) const;
 ```
 
-`ResolveAssetPath` 比 `Get` 更清楚，`Result<T>` 比隐藏失败条件更清楚，`[[nodiscard]]` 能提醒调用者处理结果。
+`ResolveAssetPath` 比 `Get` 更清楚，`Result<T>` 比隐藏失败条件更清楚，`NODISCARD` 能提醒调用者处理结果。
 
 ---
 
@@ -365,7 +365,7 @@ void AssetDatabase::Close() {
 好的做法：
 
 ```cpp
-[[nodiscard]] Result<Path> ResolveAssetPath(
+NODISCARD Result<Path> ResolveAssetPath(
     StringView InName,
     ResolveFlags InFlags) const;
 ```
@@ -373,7 +373,7 @@ void AssetDatabase::Close() {
 不好的做法：
 
 ```cpp
-[[nodiscard]] Result<Path> ResolveAssetPath(StringView InName, ResolveFlags InFlags) const;
+NODISCARD Result<Path> ResolveAssetPath(StringView InName, ResolveFlags InFlags) const;
 ```
 
 ---
@@ -578,7 +578,7 @@ class IFileSystem
 public:
     virtual ~IFileSystem() = default;
 
-    [[nodiscard]] virtual Result<String> ReadTextFile(
+    NODISCARD virtual Result<String> ReadTextFile(
         const Path& InPath) const = 0;
 };
 ```
@@ -666,7 +666,7 @@ template <typename TValue>
 class Result final
 {
 public:
-    [[nodiscard]] static Result Ok(TValue InValue);
+    NODISCARD static Result Ok(TValue InValue);
 };
 ```
 
@@ -777,8 +777,8 @@ struct AssetRecord final
 class AssetDatabase final
 {
 public:
-    [[nodiscard]] VoidResult Open(Path InManifestPath);
-    [[nodiscard]] bool IsOpen() const noexcept;
+    NODISCARD VoidResult Open(Path InManifestPath);
+    NODISCARD bool IsOpen() const noexcept;
 
 private:
     AssetManifest Manifest;
@@ -905,11 +905,11 @@ class TextureLoader final
 public:
     explicit TextureLoader(IFileSystem& InFileSystem);
 
-    [[nodiscard]] Result<Texture> LoadFromFile(const Path& InPath);
-    [[nodiscard]] bool IsLoaded() const noexcept;
+    NODISCARD Result<Texture> LoadFromFile(const Path& InPath);
+    NODISCARD bool IsLoaded() const noexcept;
 
 private:
-    [[nodiscard]] static Result<TextureInfo> ParseHeader(std::span<const std::byte> InData);
+    NODISCARD static Result<TextureInfo> ParseHeader(std::span<const std::byte> InData);
 
     IFileSystem& FileSystem;
     TextureInfo Info;
@@ -947,66 +947,26 @@ Database.Get("PlayerIcon");
 
 ---
 
-### 输入参数使用 In 前缀
+### 输出参数推荐 Out 前缀
 
-函数参数使用 `In` 前缀表达输入方向。
+当必须使用输出参数时，推荐使用 `Out` 前缀，便于在调用点区分输入与输出。
 
-好的做法：
+推荐：
 
 ```cpp
-bool LoadFromFile(const Path& InPath);
-void SetDisplayName(String InDisplayName);
+NODISCARD bool ParseColor(StringView Text, Color& OutColor);
 ```
 
-不好的做法：
+避免：
 
 ```cpp
-bool LoadFromFile(const Path& Path);
-void SetDisplayName(String displayName);
+bool ParseColor(StringView Text, Color& Color);  // 参数名与类型名冲突
 ```
 
-`In` 前缀特别适合区分参数和成员变量。
-
-好的做法：
+更好的做法是直接返回 `Result<T>`，彻底消除输出参数：
 
 ```cpp
-TextureLoader::TextureLoader(IFileSystem& InFileSystem)
-    : FileSystem(InFileSystem)
-{
-}
-```
-
-不好的做法：
-
-```cpp
-TextureLoader::TextureLoader(IFileSystem& FileSystem)
-    : FileSystem(FileSystem)
-{
-}
-```
-
----
-
-### 输出参数使用 Out 前缀
-
-当必须使用输出参数时，使用 `Out` 前缀。
-
-好的做法：
-
-```cpp
-[[nodiscard]] bool ParseColor(StringView InText, Color& OutColor);
-```
-
-不好的做法：
-
-```cpp
-bool ParseColor(StringView Text, Color& Color);
-```
-
-更好的做法是直接返回 `Result<T>`：
-
-```cpp
-[[nodiscard]] Result<Color> ParseColor(StringView InText);
+NODISCARD Result<Color> ParseColor(StringView Text);
 ```
 
 ---
@@ -1050,16 +1010,16 @@ AudioDevice.SetMuted(false);
 
 ---
 
-### 使用 [[nodiscard]]
+### 使用 NODISCARD
 
-返回错误、状态、资源句柄、查找结果的函数必须使用 `[[nodiscard]]`。
+返回错误、状态、资源句柄、查找结果的函数必须使用 `NODISCARD`。
 
 好的做法：
 
 ```cpp
-[[nodiscard]] Result<Texture> LoadTexture(const Path& InPath);
-[[nodiscard]] bool ContainsAsset(StringView InName) const;
-[[nodiscard]] Optional<AssetRecord> FindAsset(StringView InName) const;
+NODISCARD Result<Texture> LoadTexture(const Path& InPath);
+NODISCARD bool ContainsAsset(StringView InName) const;
+NODISCARD Optional<AssetRecord> FindAsset(StringView InName) const;
 ```
 
 不好的做法：
@@ -1080,8 +1040,8 @@ bool ContainsAsset(StringView InName) const;
 好的做法：
 
 ```cpp
-[[nodiscard]] bool IsOpen() const noexcept;
-[[nodiscard]] const Path& ManifestPath() const noexcept;
+NODISCARD bool IsOpen() const noexcept;
+NODISCARD const Path& ManifestPath() const noexcept;
 ```
 
 不好的做法：
@@ -1254,7 +1214,7 @@ auto X = Factory.Create();
 好的做法：
 
 ```cpp
-[[nodiscard]] Result<String> ReadTextFile(const Path& InPath) const;
+NODISCARD Result<String> ReadTextFile(const Path& InPath) const;
 ```
 
 不好的做法：
@@ -1280,7 +1240,7 @@ String ReadTextFile(const Path& Path)
 好的做法：
 
 ```cpp
-[[nodiscard]] Result<AssetManifest> ParseManifest(
+NODISCARD Result<AssetManifest> ParseManifest(
     StringView InText,
     const Path& InManifestPath);
 ```
@@ -1349,13 +1309,13 @@ auto Path = *PathResult;                   // operator*
 好的做法：
 
 ```cpp
-[[nodiscard]] Optional<AssetRecord> FindAsset(StringView InName) const;
+NODISCARD Optional<AssetRecord> FindAsset(StringView InName) const;
 ```
 
 不好的做法：
 
 ```cpp
-[[nodiscard]] Result<AssetRecord> FindAsset(StringView InName) const;
+NODISCARD Result<AssetRecord> FindAsset(StringView InName) const;
 ```
 
 如果找不到不是错误，只是查询结果为空，`optional` 更合适。
@@ -1602,7 +1562,7 @@ class UniversalManager
 
 ```cpp
 template <Zero::StringLike TName>
-[[nodiscard]] Optional<AssetRecord> FindAsset(TName&& InName) const;
+NODISCARD Optional<AssetRecord> FindAsset(TName&& InName) const;
 ```
 
 不好的做法：
@@ -1610,7 +1570,7 @@ template <Zero::StringLike TName>
 ```cpp
 // 调用方无法从签名得知 TName 必须能转为 StringView
 template <typename TName>
-[[nodiscard]] Optional<AssetRecord> FindAsset(TName&& InName) const;
+NODISCARD Optional<AssetRecord> FindAsset(TName&& InName) const;
 ```
 
 使用 `concept` 的时机：
@@ -1664,7 +1624,7 @@ bOpen = true;
 // Returns InvalidManifest if the manifest syntax is invalid.
 // Returns FileNotFound if the file system cannot read InManifestPath.
 // On failure, the previous open manifest remains unchanged.
-[[nodiscard]] VoidResult Open(Path InManifestPath);
+NODISCARD VoidResult Open(Path InManifestPath);
 ```
 
 不好的做法：
@@ -1703,7 +1663,7 @@ private:
 class AssetDatabase final
 {
 public:
-    [[nodiscard]] VoidResult Open(Path InManifestPath);
+    NODISCARD VoidResult Open(Path InManifestPath);
 };
 ```
 
@@ -1769,7 +1729,7 @@ TEST(asset_database, bad)
 - `I` 接口前缀。
 - `In` / `Out` 参数方向。
 - `Result<T>` 显式错误处理。
-- `[[nodiscard]]` 防止忽略错误。
+- `NODISCARD` 防止忽略错误。
 - 依赖注入和小接口。
 - Allman 花括号。
 
@@ -1811,37 +1771,37 @@ template <typename TValue>
 class Result final
 {
 public:
-    [[nodiscard]] static Result Ok(TValue InValue)
+    NODISCARD static Result Ok(TValue InValue)
     {
         return Result(std::move(InValue));
     }
 
-    [[nodiscard]] static Result Err(Error InError)
+    NODISCARD static Result Err(Error InError)
     {
         return Result(std::move(InError));
     }
 
-    [[nodiscard]] bool IsOk() const noexcept
+    NODISCARD bool IsOk() const noexcept
     {
         return std::holds_alternative<TValue>(Storage);
     }
 
-    [[nodiscard]] bool IsErr() const noexcept
+    NODISCARD bool IsErr() const noexcept
     {
         return !IsOk();
     }
 
-    [[nodiscard]] const TValue& Value() const&
+    NODISCARD const TValue& Value() const&
     {
         return std::get<TValue>(Storage);
     }
 
-    [[nodiscard]] TValue&& TakeValue() &&
+    NODISCARD TValue&& TakeValue() &&
     {
         return std::move(std::get<TValue>(Storage));
     }
 
-    [[nodiscard]] const Error& Failure() const&
+    NODISCARD const Error& Failure() const&
     {
         return std::get<Error>(Storage);
     }
@@ -1867,7 +1827,7 @@ class IFileSystem
 public:
     virtual ~IFileSystem() = default;
 
-    [[nodiscard]] virtual Result<std::string> ReadTextFile(
+    NODISCARD virtual Result<std::string> ReadTextFile(
         const std::filesystem::path& InPath) const = 0;
 };
 
@@ -1881,12 +1841,12 @@ struct AssetRecord final
 class AssetManifest final
 {
 public:
-    [[nodiscard]] bool ContainsAsset(std::string_view InName) const
+    NODISCARD bool ContainsAsset(std::string_view InName) const
     {
         return RecordsByName.contains(std::string(InName));
     }
 
-    [[nodiscard]] std::optional<AssetRecord> FindAsset(std::string_view InName) const
+    NODISCARD std::optional<AssetRecord> FindAsset(std::string_view InName) const
     {
         const auto It = RecordsByName.find(std::string(InName));
 
@@ -1898,7 +1858,7 @@ public:
         return It->second;
     }
 
-    [[nodiscard]] VoidResult AddRecord(AssetRecord InRecord)
+    NODISCARD VoidResult AddRecord(AssetRecord InRecord)
     {
         if (InRecord.Name.empty())
         {
@@ -1941,14 +1901,14 @@ public:
     AssetDatabase(AssetDatabase&&) = delete;
     AssetDatabase& operator=(AssetDatabase&&) = delete;
 
-    [[nodiscard]] bool IsOpen() const noexcept
+    NODISCARD bool IsOpen() const noexcept
     {
         return bOpen;
     }
 
-    [[nodiscard]] VoidResult Open(std::filesystem::path InManifestPath);
+    NODISCARD VoidResult Open(std::filesystem::path InManifestPath);
 
-    [[nodiscard]] Result<std::filesystem::path> ResolveAssetPath(
+    NODISCARD Result<std::filesystem::path> ResolveAssetPath(
         std::string_view InName) const
     {
         if (!bOpen)
