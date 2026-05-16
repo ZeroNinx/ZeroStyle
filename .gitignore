@@ -1,0 +1,48 @@
+# =============================================================================
+# ZeroStyle — .gitignore
+# =============================================================================
+
+# --- CMake build output ------------------------------------------------------
+build/
+out/
+cmake-build-*/
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+CTestTestfile.cmake
+_deps/
+install_manifest.txt
+
+# --- Visual Studio -----------------------------------------------------------
+.vs/
+*.sln
+*.vcxproj
+*.vcxproj.filters
+*.vcxproj.user
+*.VC.db
+*.VC.opendb
+
+# --- Compiler output ---------------------------------------------------------
+*.obj
+*.pdb
+*.ilk
+*.lib
+*.dll
+*.exe
+*.exp
+*.idb
+
+# --- Python ------------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*.pyo
+
+# --- Windows -----------------------------------------------------------------
+Thumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# --- Misc --------------------------------------------------------------------
+*.log
+*.tmp
+*.bak
