@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <utility>
 
 using namespace Zero;
 
@@ -14,11 +15,21 @@ static_assert(sizeof(uint8)  == 1);
 static_assert(sizeof(uint32) == 4);
 static_assert(sizeof(uint64) == 8);
 
-// --- Result<T> 基本行为 ---
-static_assert([] {
-    // 仅在 constexpr 可用时验证工厂方法可实例化
-    return true;
-}());
+struct MoveOnly final
+{
+    explicit MoveOnly(int32 InValue)
+        : Value(InValue)
+    {
+    }
+
+    MoveOnly(const MoveOnly&)            = delete;
+    MoveOnly& operator=(const MoveOnly&) = delete;
+
+    MoveOnly(MoveOnly&&) noexcept            = default;
+    MoveOnly& operator=(MoveOnly&&) noexcept = default;
+
+    int32 Value = 0;
+};
 
 int main()
 {
@@ -28,20 +39,37 @@ int main()
     assert(!OkResult.IsErr());
     assert(OkResult.Value() == 42);
 
+#if ZERO_HAS_EXPECTED
+    assert(OkResult.has_value());
+    assert(*OkResult == 42);
+#endif
+
     // Err 路径
     auto ErrResult = Result<int32>::Err(
-        MakeError(ErrorCode::InvalidArgument, "bad input"));
+        MakeError(ErrorCode::InvalidArgument, "bad input", "config.json"));
     assert(ErrResult.IsErr());
     assert(!ErrResult.IsOk());
     assert(ErrResult.Failure().Code == ErrorCode::InvalidArgument);
+    assert(ErrResult.Failure().ContextPath == Path("config.json"));
+
+#if ZERO_HAS_EXPECTED
+    assert(!ErrResult.has_value());
+    assert(ErrResult.error().Code == ErrorCode::InvalidArgument);
+#endif
 
     // VoidResult
-    VoidResult<> OkVoid = Result<Unit>::Ok(Unit{});
+    VoidResult<> OkVoid = VoidResult<>::Ok(Unit{});
     assert(OkVoid.IsOk());
 
+    // Move-only 值
+    auto MoveResult = Result<MoveOnly>::Ok(MoveOnly{7});
+    assert(MoveResult.IsOk());
+    MoveOnly MovedValue = std::move(MoveResult).TakeValue();
+    assert(MovedValue.Value == 7);
+
     // 容器别名实例化
-    Vector<int32>           Vec = {1, 2, 3};
-    HashMap<String, int32>  Map;
+    Vector<int32>          Vec = {1, 2, 3};
+    HashMap<String, int32> Map;
     Map["hello"] = 1;
 
     assert(Vec.size() == 3);

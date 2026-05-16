@@ -1341,7 +1341,7 @@ struct Error final
 {
     ErrorCode Code;
     String Message;
-    Path Path;
+    Path ContextPath;
 };
 ```
 
@@ -1926,7 +1926,7 @@ public:
             return Result<std::filesystem::path>::Err(Error{
                 .Code = ErrorCode::AssetNotFound,
                 .Message = "asset not found: " + std::string(InName),
-                .Path = CurrentManifestPath,
+                .ContextPath = CurrentManifestPath,
             });
         }
 

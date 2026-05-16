@@ -9,6 +9,7 @@
 
 #include <filesystem>
 #include <string>
+#include <utility>
 
 #include "Macros.h"
 #include "Types.h"
@@ -48,25 +49,25 @@ enum class ErrorCode
 };
 
 // =============================================================================
-// Error — 携带 Code、Message、Path 的错误值
+// Error — 携带 Code、Message、ContextPath 的错误值
 // =============================================================================
 
 struct Error final
 {
-    ErrorCode  Code    = ErrorCode::Unknown;
-    String     Message;
-    Path       Path;
+    ErrorCode Code = ErrorCode::Unknown;
+    String    Message;
+    Path      ContextPath;
 };
 
 NODISCARD inline Error MakeError(
-    ErrorCode  InCode,
-    String     InMessage,
-    Path       InPath = {})
+    ErrorCode InCode,
+    String    InMessage,
+    Path      InContextPath = {})
 {
     return Error{
-        .Code    = InCode,
-        .Message = std::move(InMessage),
-        .Path    = std::move(InPath),
+        .Code        = InCode,
+        .Message     = std::move(InMessage),
+        .ContextPath = std::move(InContextPath),
     };
 }
 

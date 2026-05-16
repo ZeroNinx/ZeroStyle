@@ -5,7 +5,7 @@ project(ZeroStyle VERSION 1.0.0 LANGUAGES CXX)
 # 选项
 # ==============================================================================
 
-option(ZERO_USE_CXX23    "使用 C++23（启用 std::expected 后端）" OFF)
+option(ZERO_USE_CXX23    "使用 C++23（可用时启用 std::expected 后端）" OFF)
 option(ZERO_BUILD_TESTS  "编译冒烟测试"                          OFF)
 
 # ==============================================================================

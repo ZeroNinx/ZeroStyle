@@ -4,11 +4,11 @@
 // Zero/Result.h — Result<TValue, TError> 与 VoidResult
 // =============================================================================
 //
-// C++23 模式：继承 std::expected<TValue, TError>。
+// std::expected 可用时：继承 std::expected<TValue, TError>。
 //   — 原生方法（has_value()、value()、error()、operator bool、operator*）可用。
 //   — PascalCase 方法（IsOk()、Value()、Failure()、TakeValue()）作为兼容层。
 //
-// C++20 模式：基于 std::variant 的自定义实现，提供相同的 PascalCase API。
+// 回退实现：基于 std::variant，提供相同的 PascalCase API。
 
 #include "Config.h"
 #include "Error.h"
@@ -22,7 +22,7 @@ namespace Zero {
 // Result<TValue, TError = Error>
 // =============================================================================
 
-#if ZERO_HAS_CXX23
+#if ZERO_HAS_EXPECTED
 
 template <typename TValue, typename TError = Error>
 class Result final : public std::expected<TValue, TError>
@@ -65,7 +65,7 @@ public:
     }
 };
 
-#else  // C++20 回退实现
+#else  // std::expected 不可用时的回退实现
 
 template <typename TValue, typename TError = Error>
 class Result final
@@ -127,7 +127,7 @@ private:
     std::variant<TValue, TError> Storage;
 };
 
-#endif  // ZERO_HAS_CXX23
+#endif  // ZERO_HAS_EXPECTED
 
 // =============================================================================
 // VoidResult — Result<Unit, TError> 的别名
