@@ -1,7 +1,7 @@
 #pragma once
 
 // =============================================================================
-// Zero/Result.h — Result<TValue, TError> 与 VoidResult
+// Zero/Result.h — TResult<TValue, TError> 与 TVoidResult
 // =============================================================================
 //
 // std::expected 可用时：继承 std::expected<TValue, TError>。
@@ -19,39 +19,39 @@
 namespace Zero {
 
 // =============================================================================
-// Result<TValue, TError = Error>
+// TResult<TValue, TError = SError>
 // =============================================================================
 
 #if ZERO_HAS_EXPECTED
 
-template <typename TValue, typename TError = Error>
-class Result final : public std::expected<TValue, TError>
+template <typename TValue, typename TError = SError>
+class TResult final : public std::expected<TValue, TError>
 {
-    using Base = std::expected<TValue, TError>;
+    using TBase = std::expected<TValue, TError>;
 
 public:
-    using Base::Base;  // 继承全部 std::expected 构造函数
+    using TBase::TBase;  // 继承全部 std::expected 构造函数
 
     // --- 工厂方法 ---
 
-    NODISCARD static Result Ok(TValue InValue)
+    NODISCARD static TResult Ok(TValue Value)
     {
-        return Result(std::move(InValue));
+        return TResult(std::move(Value));
     }
 
-    NODISCARD static Result Err(TError InError)
+    NODISCARD static TResult Err(TError Error)
     {
-        return Result(std::unexpected(std::move(InError)));
+        return TResult(std::unexpected(std::move(Error)));
     }
 
     // --- PascalCase 兼容 API ---
 
-    NODISCARD bool IsOk()  const noexcept { return Base::has_value(); }
-    NODISCARD bool IsErr() const noexcept { return !Base::has_value(); }
+    NODISCARD bool IsOk() const noexcept { return TBase::has_value(); }
+    NODISCARD bool IsErr() const noexcept { return !TBase::has_value(); }
 
     NODISCARD const TValue& Value() const&
     {
-        return Base::value();  // 未持值时抛出 std::bad_expected_access
+        return TBase::value();  // 未持值时抛出 std::bad_expected_access
     }
 
     NODISCARD TValue TakeValue() &&
@@ -61,31 +61,31 @@ public:
 
     NODISCARD const TError& Failure() const&
     {
-        return Base::error();  // 未持错误时行为未定义
+        return TBase::error();  // 未持错误时行为未定义
     }
 };
 
 #else  // std::expected 不可用时的回退实现
 
-template <typename TValue, typename TError = Error>
-class Result final
+template <typename TValue, typename TError = SError>
+class TResult final
 {
 public:
     // --- 工厂方法 ---
 
-    NODISCARD static Result Ok(TValue InValue)
+    NODISCARD static TResult Ok(TValue Value)
     {
-        return Result(OkTag{}, std::move(InValue));
+        return TResult(SOkTag{}, std::move(Value));
     }
 
-    NODISCARD static Result Err(TError InError)
+    NODISCARD static TResult Err(TError Error)
     {
-        return Result(ErrTag{}, std::move(InError));
+        return TResult(SErrTag{}, std::move(Error));
     }
 
     // --- 查询 ---
 
-    NODISCARD bool IsOk()  const noexcept { return Storage.index() == 0; }
+    NODISCARD bool IsOk() const noexcept { return Storage.index() == 0; }
     NODISCARD bool IsErr() const noexcept { return Storage.index() == 1; }
 
     NODISCARD explicit operator bool() const noexcept { return IsOk(); }
@@ -111,16 +111,16 @@ public:
     }
 
 private:
-    struct OkTag  {};
-    struct ErrTag {};
+    struct SOkTag final {};
+    struct SErrTag final {};
 
-    explicit Result(OkTag, TValue InValue)
-        : Storage(std::in_place_index<0>, std::move(InValue))
+    explicit TResult(SOkTag, TValue Value)
+        : Storage(std::in_place_index<0>, std::move(Value))
     {
     }
 
-    explicit Result(ErrTag, TError InError)
-        : Storage(std::in_place_index<1>, std::move(InError))
+    explicit TResult(SErrTag, TError Error)
+        : Storage(std::in_place_index<1>, std::move(Error))
     {
     }
 
@@ -130,10 +130,10 @@ private:
 #endif  // ZERO_HAS_EXPECTED
 
 // =============================================================================
-// VoidResult — Result<Unit, TError> 的别名
+// TVoidResult — TResult<SUnit, TError> 的别名
 // =============================================================================
 
-template <typename TError = Error>
-using VoidResult = Result<Unit, TError>;
+template <typename TError = SError>
+using TVoidResult = TResult<SUnit, TError>;
 
 }  // namespace Zero

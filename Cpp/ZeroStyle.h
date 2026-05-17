@@ -10,10 +10,10 @@
 // 各子头文件可单独引入：
 //   Zero/Config.h    — 编译期配置（ZERO_HAS_CXX23、ZERO_HAS_EXPECTED、ZERO_ASSERT）
 //   Zero/Macros.h    — 属性宏（NODISCARD、GUARDED_BY 等线程安全注解）
-//   Zero/Types.h     — 整数别名、字符串/路径别名、容器与智能指针别名
-//   Zero/Error.h     — Unit、ErrorCode、Error、MakeError
-//   Zero/Result.h    — Result<T,E>、VoidResult
-//   Zero/Concepts.h  — StringLike、PathLike、Hashable、ErrorType
+//   Zero/Types.h     — 基础值类型别名、T 前缀容器与智能指针别名
+//   Zero/Error.h     — SUnit、EErrorCode、SError、MakeError
+//   Zero/Result.h    — TResult<T,E>、TVoidResult
+//   Zero/Concepts.h  — CStringLike、CPathLike、CHashable、CErrorType
 //
 // =============================================================================
 

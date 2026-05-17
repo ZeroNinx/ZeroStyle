@@ -4,8 +4,8 @@
 // Zero/Error.h — 结构化错误类型
 // =============================================================================
 //
-// 提供 Unit、ErrorCode、Error 和 MakeError。
-// 与 Result.h 配合使用。
+// 提供 SUnit、EErrorCode、SError 和 MakeError。
+// 与 TResult.h / Result.h 配合使用。
 
 #include <filesystem>
 #include <string>
@@ -17,19 +17,19 @@
 namespace Zero {
 
 // =============================================================================
-// Unit — 表示"无值成功"，用于 VoidResult
+// SUnit — 表示“无值成功”，用于 TVoidResult
 // =============================================================================
 
-struct Unit final
+struct SUnit final
 {
-    constexpr bool operator==(const Unit&) const noexcept { return true; }
+    constexpr bool operator==(const SUnit&) const noexcept { return true; }
 };
 
 // =============================================================================
-// ErrorCode — 枚举所有已知错误类别
+// EErrorCode — 枚举所有已知错误类别
 // =============================================================================
 
-enum class ErrorCode
+enum class EErrorCode
 {
     Unknown,
     // 文件系统
@@ -49,25 +49,25 @@ enum class ErrorCode
 };
 
 // =============================================================================
-// Error — 携带 Code、Message、ContextPath 的错误值
+// SError — 携带 Code、Message、ContextPath 的错误值
 // =============================================================================
 
-struct Error final
+struct SError final
 {
-    ErrorCode Code = ErrorCode::Unknown;
-    String    Message;
-    Path      ContextPath;
+    EErrorCode Code = EErrorCode::Unknown;
+    String     Message;
+    Path       ContextPath;
 };
 
-NODISCARD inline Error MakeError(
-    ErrorCode InCode,
-    String    InMessage,
-    Path      InContextPath = {})
+NODISCARD inline SError MakeError(
+    EErrorCode Code,
+    String     Message,
+    Path       ContextPath = {})
 {
-    return Error{
-        .Code        = InCode,
-        .Message     = std::move(InMessage),
-        .ContextPath = std::move(InContextPath),
+    return SError{
+        .Code        = Code,
+        .Message     = std::move(Message),
+        .ContextPath = std::move(ContextPath),
     };
 }
 

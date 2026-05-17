@@ -4,8 +4,8 @@
 // Zero/Types.h — 基础类型别名
 // =============================================================================
 //
-// 整数类型、浮点别名、字符串/路径别名、容器与智能指针别名。
-// 均在 Zero:: 命名空间内定义。
+// 仅提供标准库类型的 PascalCase / T 前缀别名，不做无语义封装。
+// 基础值类型别名不加 Z/S/T；模板类型别名使用 T 前缀。
 
 #include <array>
 #include <cstdint>
@@ -27,7 +27,7 @@
 
 namespace Zero {
 
-// --- 整数 ---
+// --- 整数 / 浮点 ---
 
 using int8    = std::int8_t;
 using int16   = std::int16_t;
@@ -52,59 +52,59 @@ using Path        = std::filesystem::path;
 
 // --- 智能指针 / Optional ---
 
-template <typename T>
-using Optional  = std::optional<T>;
+template <typename TValue>
+using TOptional = std::optional<TValue>;
 
-template <typename T>
-using UniquePtr = std::unique_ptr<T>;
+template <typename TValue>
+using TUniquePtr = std::unique_ptr<TValue>;
 
-template <typename T>
-using SharedPtr = std::shared_ptr<T>;
+template <typename TValue>
+using TSharedPtr = std::shared_ptr<TValue>;
 
-template <typename T>
-using WeakPtr   = std::weak_ptr<T>;
+template <typename TValue>
+using TWeakPtr = std::weak_ptr<TValue>;
 
 // --- 序列容器 ---
 
-template <typename T>
-using Vector = std::vector<T>;
+template <typename TValue>
+using TVector = std::vector<TValue>;
 
-template <typename T, std::size_t N>
-using Array  = std::array<T, N>;
+template <typename TValue, std::size_t Size>
+using TArray = std::array<TValue, Size>;
 
-template <typename T>
-using Deque  = std::deque<T>;
+template <typename TValue>
+using TDeque = std::deque<TValue>;
 
-template <typename T>
-using List   = std::list<T>;
+template <typename TValue>
+using TList = std::list<TValue>;
 
-template <typename T>
-using Queue  = std::queue<T>;
+template <typename TValue>
+using TQueue = std::queue<TValue>;
 
-template <typename T>
-using Stack  = std::stack<T>;
+template <typename TValue>
+using TStack = std::stack<TValue>;
 
 template <typename TFirst, typename TSecond>
-using Pair   = std::pair<TFirst, TSecond>;
+using TPair = std::pair<TFirst, TSecond>;
 
 // --- 关联容器 ---
 
 template <typename TKey, typename TValue,
           typename TCompare = std::less<TKey>>
-using Map = std::map<TKey, TValue, TCompare>;
+using TMap = std::map<TKey, TValue, TCompare>;
 
 template <typename TKey, typename TValue,
           typename THash  = std::hash<TKey>,
           typename TEqual = std::equal_to<TKey>>
-using HashMap = std::unordered_map<TKey, TValue, THash, TEqual>;
+using THashMap = std::unordered_map<TKey, TValue, THash, TEqual>;
 
-template <typename T,
-          typename TCompare = std::less<T>>
-using Set = std::set<T, TCompare>;
+template <typename TValue,
+          typename TCompare = std::less<TValue>>
+using TSet = std::set<TValue, TCompare>;
 
-template <typename T,
-          typename THash  = std::hash<T>,
-          typename TEqual = std::equal_to<T>>
-using HashSet = std::unordered_set<T, THash, TEqual>;
+template <typename TValue,
+          typename THash  = std::hash<TValue>,
+          typename TEqual = std::equal_to<TValue>>
+using THashSet = std::unordered_set<TValue, THash, TEqual>;
 
 }  // namespace Zero

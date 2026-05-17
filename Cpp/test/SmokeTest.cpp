@@ -15,18 +15,18 @@ static_assert(sizeof(uint8)  == 1);
 static_assert(sizeof(uint32) == 4);
 static_assert(sizeof(uint64) == 8);
 
-struct MoveOnly final
+struct SMoveOnly final
 {
-    explicit MoveOnly(int32 InValue)
-        : Value(InValue)
+    explicit SMoveOnly(int32 InitialValue)
+        : Value(InitialValue)
     {
     }
 
-    MoveOnly(const MoveOnly&)            = delete;
-    MoveOnly& operator=(const MoveOnly&) = delete;
+    SMoveOnly(const SMoveOnly&)            = delete;
+    SMoveOnly& operator=(const SMoveOnly&) = delete;
 
-    MoveOnly(MoveOnly&&) noexcept            = default;
-    MoveOnly& operator=(MoveOnly&&) noexcept = default;
+    SMoveOnly(SMoveOnly&&) noexcept            = default;
+    SMoveOnly& operator=(SMoveOnly&&) noexcept = default;
 
     int32 Value = 0;
 };
@@ -34,7 +34,7 @@ struct MoveOnly final
 int main()
 {
     // Ok 路径
-    auto OkResult = Result<int32>::Ok(42);
+    auto OkResult = TResult<int32>::Ok(42);
     assert(OkResult.IsOk());
     assert(!OkResult.IsErr());
     assert(OkResult.Value() == 42);
@@ -45,31 +45,31 @@ int main()
 #endif
 
     // Err 路径
-    auto ErrResult = Result<int32>::Err(
-        MakeError(ErrorCode::InvalidArgument, "bad input", "config.json"));
+    auto ErrResult = TResult<int32>::Err(
+        MakeError(EErrorCode::InvalidArgument, "bad input", "config.json"));
     assert(ErrResult.IsErr());
     assert(!ErrResult.IsOk());
-    assert(ErrResult.Failure().Code == ErrorCode::InvalidArgument);
+    assert(ErrResult.Failure().Code == EErrorCode::InvalidArgument);
     assert(ErrResult.Failure().ContextPath == Path("config.json"));
 
 #if ZERO_HAS_EXPECTED
     assert(!ErrResult.has_value());
-    assert(ErrResult.error().Code == ErrorCode::InvalidArgument);
+    assert(ErrResult.error().Code == EErrorCode::InvalidArgument);
 #endif
 
-    // VoidResult
-    VoidResult<> OkVoid = VoidResult<>::Ok(Unit{});
+    // TVoidResult
+    TVoidResult<> OkVoid = TVoidResult<>::Ok(SUnit{});
     assert(OkVoid.IsOk());
 
     // Move-only 值
-    auto MoveResult = Result<MoveOnly>::Ok(MoveOnly{7});
+    auto MoveResult = TResult<SMoveOnly>::Ok(SMoveOnly{7});
     assert(MoveResult.IsOk());
-    MoveOnly MovedValue = std::move(MoveResult).TakeValue();
+    SMoveOnly MovedValue = std::move(MoveResult).TakeValue();
     assert(MovedValue.Value == 7);
 
     // 容器别名实例化
-    Vector<int32>          Vec = {1, 2, 3};
-    HashMap<String, int32> Map;
+    TVector<int32>          Vec = {1, 2, 3};
+    THashMap<String, int32> Map;
     Map["hello"] = 1;
 
     assert(Vec.size() == 3);
