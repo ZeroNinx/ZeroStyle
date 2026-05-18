@@ -79,15 +79,20 @@ endif()
 
 if(ZERO_BUILD_TESTS)
     enable_testing()
-    add_executable(ZeroStyle_SmokeTest test/SmokeTest.cpp)
-    target_link_libraries(ZeroStyle_SmokeTest PRIVATE Zero::ZeroStyle)
-    zero_apply_project_warnings(ZeroStyle_SmokeTest)
-    add_test(NAME SmokeTest COMMAND ZeroStyle_SmokeTest)
 
-    add_executable(ZeroStyle_ShortMacrosSmokeTest test/ShortMacrosSmokeTest.cpp)
-    target_link_libraries(ZeroStyle_ShortMacrosSmokeTest PRIVATE Zero::ZeroStyle)
-    zero_apply_project_warnings(ZeroStyle_ShortMacrosSmokeTest)
-    add_test(NAME ShortMacrosSmokeTest COMMAND ZeroStyle_ShortMacrosSmokeTest)
+    function(zero_add_smoke_test TestName SourceFile)
+        add_executable(ZeroStyle_${TestName} ${SourceFile})
+        target_link_libraries(ZeroStyle_${TestName} PRIVATE Zero::ZeroStyle)
+        zero_apply_project_warnings(ZeroStyle_${TestName})
+        add_test(NAME ZeroStyle.${TestName} COMMAND ZeroStyle_${TestName})
+    endfunction()
+
+    zero_add_smoke_test(MacrosSmokeTest      test/MacrosSmokeTest.cpp)
+    zero_add_smoke_test(ResultSmokeTest      test/ResultSmokeTest.cpp)
+    zero_add_smoke_test(ScopeFlagsSmokeTest  test/ScopeFlagsSmokeTest.cpp)
+    zero_add_smoke_test(ShortMacrosSmokeTest test/ShortMacrosSmokeTest.cpp)
+    zero_add_smoke_test(StringPathSmokeTest  test/StringPathSmokeTest.cpp)
+    zero_add_smoke_test(TypesConceptsSmokeTest test/TypesConceptsSmokeTest.cpp)
 endif()
 
 # ==============================================================================
