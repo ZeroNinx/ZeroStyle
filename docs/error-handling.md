@@ -38,24 +38,22 @@ auto LoadedConfig = ReadTextFile(ConfigPath).AndThen(ParseConfig);
 
 `AndThen` 的回调应返回使用同一错误类型的 `TResult`，错误路径只负责透传，不做错误类型转换。
 
-## TVoidResult
+## TResult<void>
 
-当成功不需要返回值，但失败需要错误原因时，使用 `TVoidResult<>`：
+当成功不需要返回值，但失败需要错误原因时，使用 `TResult<void>`：
 
 ```cpp
-ZERO_NODISCARD TVoidResult<> SaveConfig(const SConfig& Config);
+ZERO_NODISCARD TResult<void> SaveConfig(const SConfig& Config);
 ```
 
-成功返回可以使用 `OkVoid()`：
+成功返回使用 `TResult<void>::Ok()`：
 
 ```cpp
-TVoidResult<> SaveConfig(const SConfig& Config)
+TResult<void> SaveConfig(const SConfig& Config)
 {
-    return OkVoid();
+    return TResult<void>::Ok();
 }
 ```
-
-`TVoidResult<>` 也支持直接返回 `TVoidResult<>::Ok()`，适合需要显式写出结果类型的地方。
 
 ## TOptional
 

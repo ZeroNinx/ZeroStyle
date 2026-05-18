@@ -45,13 +45,13 @@ int main()
     ZERO_CHECK(CopiedErrResult.IsErr());
     ZERO_CHECK(CopiedErrResult.Failure().Code == EErrorCode::InvalidArgument);
 
-    TVoidResult<> VoidResult = OkVoid();
+    auto VoidResult = TResult<void>::Ok();
     ZERO_CHECK(VoidResult.IsOk());
 
-    TVoidResult<> DirectVoidResult = TVoidResult<>::Ok();
+    auto DirectVoidResult = TResult<void>::Ok();
     ZERO_CHECK(DirectVoidResult.IsOk());
-    ZERO_CHECK(DirectVoidResult.Value() == SUnit{});
-    ZERO_CHECK(DirectVoidResult.ValueOr() == SUnit{});
+    DirectVoidResult.Value();
+    std::move(DirectVoidResult).TakeValue();
 
     auto MoveResult = TResult<SMoveOnly>::Ok(SMoveOnly{7});
     ZERO_CHECK(MoveResult.IsOk());
@@ -103,35 +103,35 @@ int main()
     ZERO_CHECK(ChainedErr.IsErr());
     ZERO_CHECK(ChainedErr.Failure().Code == EErrorCode::NotOpen);
 
-    auto UnitMapped = TVoidResult<>::Ok().Map([] {
+    auto VoidMapped = TResult<void>::Ok().Map([] {
         return 42;
     });
-    ZERO_CHECK(UnitMapped.IsOk());
-    ZERO_CHECK(UnitMapped.Value() == 42);
+    ZERO_CHECK(VoidMapped.IsOk());
+    ZERO_CHECK(VoidMapped.Value() == 42);
 
-    bool bUnitVoidMapRan = false;
-    auto UnitVoidMapped = TVoidResult<>::Ok().Map([&bUnitVoidMapRan] {
-        bUnitVoidMapRan = true;
+    bool bVoidToVoidMapRan = false;
+    auto VoidToVoidMapped = TResult<void>::Ok().Map([&bVoidToVoidMapRan] {
+        bVoidToVoidMapRan = true;
     });
-    ZERO_CHECK(bUnitVoidMapRan);
-    ZERO_CHECK(UnitVoidMapped.IsOk());
+    ZERO_CHECK(bVoidToVoidMapRan);
+    ZERO_CHECK(VoidToVoidMapped.IsOk());
 
-    auto UnitChained = TVoidResult<>::Ok().AndThen([] {
+    auto VoidChained = TResult<void>::Ok().AndThen([] {
         return TResult<int32>::Ok(13);
     });
-    ZERO_CHECK(UnitChained.IsOk());
-    ZERO_CHECK(UnitChained.Value() == 13);
+    ZERO_CHECK(VoidChained.IsOk());
+    ZERO_CHECK(VoidChained.Value() == 13);
 
-    bool bSkippedUnitAndThen = true;
-    auto UnitChainedErr =
-        TVoidResult<>::Err(MakeError(EErrorCode::FileWriteFailed, "cannot write"))
-            .AndThen([&bSkippedUnitAndThen] {
-                bSkippedUnitAndThen = false;
+    bool bSkippedVoidAndThen = true;
+    auto VoidChainedErr =
+        TResult<void>::Err(MakeError(EErrorCode::FileWriteFailed, "cannot write"))
+            .AndThen([&bSkippedVoidAndThen] {
+                bSkippedVoidAndThen = false;
                 return TResult<int32>::Ok(13);
             });
-    ZERO_CHECK(bSkippedUnitAndThen);
-    ZERO_CHECK(UnitChainedErr.IsErr());
-    ZERO_CHECK(UnitChainedErr.Failure().Code == EErrorCode::FileWriteFailed);
+    ZERO_CHECK(bSkippedVoidAndThen);
+    ZERO_CHECK(VoidChainedErr.IsErr());
+    ZERO_CHECK(VoidChainedErr.Failure().Code == EErrorCode::FileWriteFailed);
 
     const SError FormattedError = MakeError(
         EErrorCode::ParseFailed,

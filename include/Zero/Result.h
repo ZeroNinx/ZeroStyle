@@ -1,7 +1,7 @@
 #pragma once
 
 // =============================================================================
-// Zero/Result.h — TResult<TValue, TError> 与 TVoidResult
+// Zero/Result.h — TResult<TValue, TError>
 // =============================================================================
 //
 // TResult 提供稳定的 PascalCase API。C++23 且 std::expected 可用时，内部使用
@@ -128,7 +128,7 @@ public:
 
         if constexpr (std::is_void_v<TMappedValue>)
         {
-            using TResultType = TResult<SUnit, TError>;
+            using TResultType = TResult<void, TError>;
 
             if (IsOk())
             {
@@ -158,7 +158,7 @@ public:
 
         if constexpr (std::is_void_v<TMappedValue>)
         {
-            using TResultType = TResult<SUnit, TError>;
+            using TResultType = TResult<void, TError>;
 
             if (IsOk())
             {
@@ -238,21 +238,16 @@ private:
 };
 
 // =============================================================================
-// TResult<SUnit, TError> — 无值成功结果的偏特化
+// TResult<void, TError> — 无返回值成功结果的偏特化
 // =============================================================================
 
 template <typename TError>
-class TResult<SUnit, TError> final
+class TResult<void, TError> final
 {
 public:
     ZERO_NODISCARD static TResult Ok()
     {
         return TResult(SOkTag{});
-    }
-
-    ZERO_NODISCARD static TResult Ok(SUnit)
-    {
-        return Ok();
     }
 
     ZERO_NODISCARD static TResult Err(TError Error)
@@ -279,26 +274,14 @@ public:
         return IsOk();
     }
 
-    ZERO_NODISCARD const SUnit& Value() const&
+    void Value() const&
     {
         ZERO_ASSERT(IsOk());
-
-#if ZERO_HAS_EXPECTED
-        return *Storage;
-#else
-        return std::get<0>(Storage);
-#endif
     }
 
-    ZERO_NODISCARD SUnit TakeValue() &&
+    void TakeValue() &&
     {
         ZERO_ASSERT(IsOk());
-        return SUnit{};
-    }
-
-    ZERO_NODISCARD SUnit ValueOr(SUnit DefaultValue = {}) const noexcept
-    {
-        return IsOk() ? SUnit{} : DefaultValue;
     }
 
     ZERO_NODISCARD const TError& Failure() const&
@@ -330,7 +313,7 @@ public:
 
         if constexpr (std::is_void_v<TMappedValue>)
         {
-            using TResultType = TResult<SUnit, TError>;
+            using TResultType = TResult<void, TError>;
 
             if (IsOk())
             {
@@ -360,7 +343,7 @@ public:
 
         if constexpr (std::is_void_v<TMappedValue>)
         {
-            using TResultType = TResult<SUnit, TError>;
+            using TResultType = TResult<void, TError>;
 
             if (IsOk())
             {
@@ -415,9 +398,9 @@ private:
 
     explicit TResult(SOkTag)
 #if ZERO_HAS_EXPECTED
-        : Storage(SUnit{})
+        : Storage()
 #else
-        : Storage(std::in_place_index<0>, SUnit{})
+        : Storage(std::in_place_index<0>)
 #endif
     {
     }
@@ -432,23 +415,10 @@ private:
     }
 
 #if ZERO_HAS_EXPECTED
-    std::expected<SUnit, TError> Storage;
+    std::expected<void, TError> Storage;
 #else
-    std::variant<SUnit, TError> Storage;
+    std::variant<std::monostate, TError> Storage;
 #endif
 };
-
-// =============================================================================
-// TVoidResult — TResult<SUnit, TError> 的别名
-// =============================================================================
-
-template <typename TError = SError>
-using TVoidResult = TResult<SUnit, TError>;
-
-template <typename TError = SError>
-ZERO_NODISCARD TVoidResult<TError> OkVoid()
-{
-    return TVoidResult<TError>::Ok();
-}
 
 }  // namespace Zero

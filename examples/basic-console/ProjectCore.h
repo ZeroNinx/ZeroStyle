@@ -20,7 +20,6 @@ using Zero::THashMap;
 using Zero::TOptional;
 using Zero::TResult;
 using Zero::TVector;
-using Zero::TVoidResult;
 using Zero::int32;
 using Zero::uint32;
 

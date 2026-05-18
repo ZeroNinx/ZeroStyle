@@ -719,7 +719,7 @@ struct SAssetRecord
 class ZAssetDatabase
 {
 public:
-    ZERO_NODISCARD TVoidResult<> Open(Path ManifestPath);
+    ZERO_NODISCARD TResult<void> Open(Path ManifestPath);
     ZERO_NODISCARD bool IsOpen() const noexcept;
 
 private:
@@ -1052,24 +1052,24 @@ ZERO_NODISCARD const Path& ManifestPath() const noexcept;
 函数应保持短小。超过约 50 行的函数应考虑拆分。超过约 100 行的函数通常需要重构。
 
 ```cpp
-TVoidResult<> ZAssetDatabase::Open(Path ManifestPath)
+TResult<void> ZAssetDatabase::Open(Path ManifestPath)
 {
     auto TextResult = FileSystem.ReadTextFile(ManifestPath);
 
     if (TextResult.IsErr())
     {
-        return TVoidResult<>::Err(TextResult.Failure());
+        return TResult<void>::Err(TextResult.Failure());
     }
 
     auto ManifestResult = ParseManifest(TextResult.Value(), ManifestPath);
 
     if (ManifestResult.IsErr())
     {
-        return TVoidResult<>::Err(ManifestResult.Failure());
+        return TResult<void>::Err(ManifestResult.Failure());
     }
 
     ApplyManifest(std::move(ManifestPath), std::move(ManifestResult).TakeValue());
-    return TVoidResult<>::Ok(SUnit{});
+    return TResult<void>::Ok();
 }
 ```
 
@@ -1400,7 +1400,7 @@ bOpen = true;
 // Returns InvalidManifest if the manifest syntax is invalid.
 // Returns FileNotFound if the file system cannot read ManifestPath.
 // On failure, the previous open manifest remains unchanged.
-ZERO_NODISCARD TVoidResult<> Open(Path ManifestPath);
+ZERO_NODISCARD TResult<void> Open(Path ManifestPath);
 ```
 
 ---
@@ -1428,7 +1428,7 @@ private:
 class ZAssetDatabase
 {
 public:
-    ZERO_NODISCARD TVoidResult<> Open(Path ManifestPath);
+    ZERO_NODISCARD TResult<void> Open(Path ManifestPath);
 };
 ```
 
@@ -1530,11 +1530,11 @@ public:
         return It->second;
     }
 
-    ZERO_NODISCARD TVoidResult<> AddRecord(SAssetRecord Record)
+    ZERO_NODISCARD TResult<void> AddRecord(SAssetRecord Record)
     {
         if (Record.Name.empty())
         {
-            return TVoidResult<>::Err(MakeError(
+            return TResult<void>::Err(MakeError(
                 EErrorCode::InvalidManifest,
                 "asset name must not be empty"));
         }
@@ -1545,12 +1545,12 @@ public:
 
         if (!bInserted)
         {
-            return TVoidResult<>::Err(MakeError(
+            return TResult<void>::Err(MakeError(
                 EErrorCode::DuplicateAsset,
                 "duplicate asset name: " + Name));
         }
 
-        return TVoidResult<>::Ok(SUnit{});
+        return TResult<void>::Ok();
     }
 
 private:

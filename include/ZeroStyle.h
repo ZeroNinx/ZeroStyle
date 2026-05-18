@@ -11,8 +11,8 @@
 //   Zero/Config.h    — 编译期配置（ZERO_HAS_CXX23、ZERO_HAS_EXPECTED、ZERO_ASSERT）
 //   Zero/Macros.h    — 属性宏（ZERO_NODISCARD、ZERO_NORETURN、ZERO_GUARDED_BY 等）
 //   Zero/Types.h     — 基础值类型别名、T 前缀容器与智能指针别名
-//   Zero/Error.h     — SUnit、EErrorCode、SError、MakeError
-//   Zero/Result.h    — TResult<T,E>、TVoidResult
+//   Zero/Error.h     — EErrorCode、SError、MakeError
+//   Zero/Result.h    — TResult<T,E>
 //   Zero/Concepts.h  — CStringLike、CPathLike、CHashable、CErrorType
 //   Zero/Diagnostics.h — ZERO_CHECK、ZERO_ENSURE、ZERO_UNREACHABLE
 //   Zero/Scope.h     — TScopeExit、MakeScopeExit
