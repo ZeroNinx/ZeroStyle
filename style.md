@@ -93,7 +93,7 @@ return Database.IsOpen() ? ResolveImpl(Name) : TResult<Path>::Err(MakeError(EErr
 好的做法：
 
 ```cpp
-NODISCARD TResult<Path> ResolveAssetPath(StringView Name) const;
+ZERO_NODISCARD TResult<Path> ResolveAssetPath(StringView Name) const;
 ```
 
 不好的做法：
@@ -102,7 +102,7 @@ NODISCARD TResult<Path> ResolveAssetPath(StringView Name) const;
 Path Get(StringView Name) const;
 ```
 
-`ResolveAssetPath` 比 `Get` 更清楚，`TResult<T>` 比隐藏失败条件更清楚，`NODISCARD` 能提醒调用者处理结果。
+`ResolveAssetPath` 比 `Get` 更清楚，`TResult<T>` 比隐藏失败条件更清楚，`ZERO_NODISCARD` 能提醒调用者处理结果。
 
 ---
 
@@ -201,7 +201,7 @@ class ZEmailAddress
 {
 public:
     static TResult<ZEmailAddress> Parse(StringView Text);
-    NODISCARD StringView ToString() const noexcept;
+    ZERO_NODISCARD StringView ToString() const noexcept;
 
 private:
     explicit ZEmailAddress(String Text);
@@ -420,7 +420,7 @@ void ZAssetDatabase::Close()
 推荐行宽不超过 100 列。复杂函数签名应换行。
 
 ```cpp
-NODISCARD TResult<Path> ResolveAssetPath(
+ZERO_NODISCARD TResult<Path> ResolveAssetPath(
     StringView Name,
     EResolveFlags Flags) const;
 ```
@@ -608,7 +608,7 @@ class IFileSystem
 public:
     virtual ~IFileSystem() = default;
 
-    NODISCARD virtual TResult<String> ReadTextFile(const Path& FilePath) const = 0;
+    ZERO_NODISCARD virtual TResult<String> ReadTextFile(const Path& FilePath) const = 0;
 };
 ```
 
@@ -719,8 +719,8 @@ struct SAssetRecord
 class ZAssetDatabase
 {
 public:
-    NODISCARD TVoidResult<> Open(Path ManifestPath);
-    NODISCARD bool IsOpen() const noexcept;
+    ZERO_NODISCARD TVoidResult<> Open(Path ManifestPath);
+    ZERO_NODISCARD bool IsOpen() const noexcept;
 
 private:
     ZAssetManifest Manifest;
@@ -827,11 +827,11 @@ class ZTextureLoader
 public:
     explicit ZTextureLoader(IFileSystem& FileSystemRef);
 
-    NODISCARD TResult<ZTexture> LoadFromFile(const Path& FilePath);
-    NODISCARD bool IsLoaded() const noexcept;
+    ZERO_NODISCARD TResult<ZTexture> LoadFromFile(const Path& FilePath);
+    ZERO_NODISCARD bool IsLoaded() const noexcept;
 
 private:
-    NODISCARD static TResult<STextureInfo> ParseHeader(std::span<const std::byte> Data);
+    ZERO_NODISCARD static TResult<STextureInfo> ParseHeader(std::span<const std::byte> Data);
 
     IFileSystem& FileSystem;
     STextureInfo Info;
@@ -874,7 +874,7 @@ Database.Get("PlayerIcon");
 当必须使用非返回值输出参数时，推荐使用 `Out` 前缀。普通输入参数不使用 `In` 前缀。
 
 ```cpp
-NODISCARD bool ParseColor(StringView Text, SColor& OutColor);
+ZERO_NODISCARD bool ParseColor(StringView Text, SColor& OutColor);
 ```
 
 避免：
@@ -886,7 +886,7 @@ bool ParseColor(StringView Text, SColor& Color);
 更好的做法是直接返回 `TResult<T>`：
 
 ```cpp
-NODISCARD TResult<SColor> ParseColor(StringView Text);
+ZERO_NODISCARD TResult<SColor> ParseColor(StringView Text);
 ```
 
 ---
@@ -1029,7 +1029,7 @@ struct SConfig
     String Name;
 };
 
-NODISCARD TResult<SConfig> ParseConfig(String Text);
+ZERO_NODISCARD TResult<SConfig> ParseConfig(String Text);
 
 }  // namespace Project
 ```
@@ -1041,8 +1041,8 @@ NODISCARD TResult<SConfig> ParseConfig(String Text);
 不会修改对象状态的成员函数应标记 `const`。保证不抛异常的轻量函数可以标记 `noexcept`。
 
 ```cpp
-NODISCARD bool IsOpen() const noexcept;
-NODISCARD const Path& ManifestPath() const noexcept;
+ZERO_NODISCARD bool IsOpen() const noexcept;
+ZERO_NODISCARD const Path& ManifestPath() const noexcept;
 ```
 
 ---
@@ -1137,7 +1137,7 @@ auto X = Factory.Create();
 项目代码默认不使用异常表达可预期错误。可预期错误通过 `TResult<T>` 或 `TOptional<T>` 返回。
 
 ```cpp
-NODISCARD TResult<String> ReadTextFile(const Path& FilePath) const;
+ZERO_NODISCARD TResult<String> ReadTextFile(const Path& FilePath) const;
 ```
 
 异常可用于不可恢复错误、第三方库边界或程序启动阶段，但不应作为普通控制流。
@@ -1149,7 +1149,7 @@ NODISCARD TResult<String> ReadTextFile(const Path& FilePath) const;
 可能失败且需要错误信息的函数返回 `TResult<TValue, TError>`。默认错误类型是 `SError`。
 
 ```cpp
-NODISCARD TResult<ZAssetManifest> ParseManifest(
+ZERO_NODISCARD TResult<ZAssetManifest> ParseManifest(
     StringView Text,
     const Path& ManifestPath);
 ```
@@ -1190,7 +1190,7 @@ auto AssetPath = std::move(PathResult).TakeValue();
 当失败只有“有或没有”，且不需要错误原因时，使用 `TOptional<T>`。
 
 ```cpp
-NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
+ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
 ```
 
 如果找不到不是错误，只是查询结果为空，`TOptional` 更合适。
@@ -1354,7 +1354,7 @@ class TResult final
 
 ```cpp
 template <Zero::CStringLike TName>
-NODISCARD TOptional<SAssetRecord> FindAsset(TName&& Name) const;
+ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(TName&& Name) const;
 ```
 
 `ZeroStyle.h` 提供以下常用 concept：
@@ -1400,7 +1400,7 @@ bOpen = true;
 // Returns InvalidManifest if the manifest syntax is invalid.
 // Returns FileNotFound if the file system cannot read ManifestPath.
 // On failure, the previous open manifest remains unchanged.
-NODISCARD TVoidResult<> Open(Path ManifestPath);
+ZERO_NODISCARD TVoidResult<> Open(Path ManifestPath);
 ```
 
 ---
@@ -1428,7 +1428,7 @@ private:
 class ZAssetDatabase
 {
 public:
-    NODISCARD TVoidResult<> Open(Path ManifestPath);
+    ZERO_NODISCARD TVoidResult<> Open(Path ManifestPath);
 };
 ```
 
@@ -1507,18 +1507,18 @@ class IFileSystem
 public:
     virtual ~IFileSystem() = default;
 
-    NODISCARD virtual TResult<String> ReadTextFile(const Path& FilePath) const = 0;
+    ZERO_NODISCARD virtual TResult<String> ReadTextFile(const Path& FilePath) const = 0;
 };
 
 class ZAssetManifest
 {
 public:
-    NODISCARD bool ContainsAsset(StringView Name) const
+    ZERO_NODISCARD bool ContainsAsset(StringView Name) const
     {
         return RecordsByName.contains(String(Name));
     }
 
-    NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const
+    ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const
     {
         const auto It = RecordsByName.find(String(Name));
 
@@ -1530,7 +1530,7 @@ public:
         return It->second;
     }
 
-    NODISCARD TVoidResult<> AddRecord(SAssetRecord Record)
+    ZERO_NODISCARD TVoidResult<> AddRecord(SAssetRecord Record)
     {
         if (Record.Name.empty())
         {
@@ -1571,12 +1571,12 @@ public:
     ZAssetDatabase(ZAssetDatabase&&) = delete;
     ZAssetDatabase& operator=(ZAssetDatabase&&) = delete;
 
-    NODISCARD bool IsOpen() const noexcept
+    ZERO_NODISCARD bool IsOpen() const noexcept
     {
         return bOpen;
     }
 
-    NODISCARD TResult<Path> ResolveAssetPath(StringView Name) const
+    ZERO_NODISCARD TResult<Path> ResolveAssetPath(StringView Name) const
     {
         if (!bOpen)
         {
