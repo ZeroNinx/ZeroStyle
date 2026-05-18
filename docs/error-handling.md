@@ -23,6 +23,21 @@ if (ConfigResult.IsErr())
 SConfig Config = std::move(ConfigResult).TakeValue();
 ```
 
+简单默认值可以使用 `ValueOr`。需要转换成功值时使用 `Map`；需要串联另一个返回 `TResult` 的操作时使用 `AndThen`：
+
+```cpp
+int32 Port = ParsePort(Text).ValueOr(8080);
+
+auto NormalizedConfig = ParseConfig(Text).Map([](SConfig Config) {
+    Config.Name = Trim(Config.Name);
+    return Config;
+});
+
+auto LoadedConfig = ReadTextFile(ConfigPath).AndThen(ParseConfig);
+```
+
+`AndThen` 的回调应返回使用同一错误类型的 `TResult`，错误路径只负责透传，不做错误类型转换。
+
 ## TVoidResult
 
 当成功不需要返回值，但失败需要错误原因时，使用 `TVoidResult<>`：
@@ -39,6 +54,8 @@ TVoidResult<> SaveConfig(const SConfig& Config)
     return OkVoid();
 }
 ```
+
+`TVoidResult<>` 也支持直接返回 `TVoidResult<>::Ok()`，适合需要显式写出结果类型的地方。
 
 ## TOptional
 
