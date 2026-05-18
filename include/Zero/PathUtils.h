@@ -9,17 +9,17 @@
 
 namespace Zero {
 
-NODISCARD inline String ToGenericString(const Path& FilePath)
+ZERO_NODISCARD inline String ToGenericString(const Path& FilePath)
 {
     return FilePath.generic_string();
 }
 
-NODISCARD inline Path NormalizeLexically(const Path& FilePath)
+ZERO_NODISCARD inline Path NormalizeLexically(const Path& FilePath)
 {
     return FilePath.lexically_normal();
 }
 
-NODISCARD inline bool HasExtension(const Path& FilePath, StringView Extension)
+ZERO_NODISCARD inline bool HasExtension(const Path& FilePath, StringView Extension)
 {
     const String ActualExtension = FilePath.extension().string();
 
@@ -38,7 +38,7 @@ NODISCARD inline bool HasExtension(const Path& FilePath, StringView Extension)
            StringView(ActualExtension).substr(1) == Extension;
 }
 
-NODISCARD inline Path WithExtension(Path FilePath, StringView Extension)
+ZERO_NODISCARD inline Path WithExtension(Path FilePath, StringView Extension)
 {
     if (Extension.empty() || Extension.front() == '.')
     {

@@ -13,6 +13,8 @@ target_link_libraries(MyTarget
 
 链接 `Zero::ZeroStyle` 不会产生实际库文件，但会传递 include path 和 C++ 标准要求。
 
+ZeroStyle 不设置全局 `CMAKE_CXX_STANDARD`。默认只通过 `Zero::ZeroStyle` 的 `target_compile_features` 表达 C++20/C++23 要求，避免影响宿主项目的其他 target。
+
 ## 项目公共头
 
 推荐项目建立自己的公共基础头，选择性转发 ZeroStyle 类型：
@@ -34,6 +36,22 @@ using Zero::int32;
 ```
 
 公共头文件不要写 `using namespace Zero;`。
+
+公共头文件也不建议默认启用短名字宏，除非项目明确把短宏作为公共风格契约。
+
+`.cpp` 文件可以更自由地使用短宏：
+
+```cpp
+#define ZERO_ENABLE_SHORT_MACROS
+#include "ProjectCore.h"
+
+using namespace Zero;
+
+NODISCARD TVector<String> BuildNames()
+{
+    return {};
+}
+```
 
 ## FetchContent
 
@@ -74,6 +92,13 @@ C++23 配置：
 cmake --preset dev-cxx23
 cmake --build --preset dev-cxx23
 ctest --preset dev-cxx23
+```
+
+Clang 线程安全分析默认关闭。需要时可显式启用：
+
+```cmake
+set(ZERO_ENABLE_THREAD_SAFETY_ANALYSIS ON)
+add_subdirectory(path/to/ZeroStyle)
 ```
 
 ## Install Package

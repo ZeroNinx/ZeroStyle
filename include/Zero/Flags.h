@@ -30,19 +30,19 @@ concept CEnumFlags =
 
 template <typename TEnum>
     requires std::is_enum_v<TEnum>
-NODISCARD constexpr auto ToUnderlying(TEnum Value) noexcept
+ZERO_NODISCARD constexpr auto ToUnderlying(TEnum Value) noexcept
 {
     return static_cast<std::underlying_type_t<TEnum>>(Value);
 }
 
 template <CEnumFlags TEnum>
-NODISCARD constexpr bool HasAnyFlags(TEnum Value, TEnum Flags) noexcept
+ZERO_NODISCARD constexpr bool HasAnyFlags(TEnum Value, TEnum Flags) noexcept
 {
     return (ToUnderlying(Value) & ToUnderlying(Flags)) != 0;
 }
 
 template <CEnumFlags TEnum>
-NODISCARD constexpr bool HasAllFlags(TEnum Value, TEnum Flags) noexcept
+ZERO_NODISCARD constexpr bool HasAllFlags(TEnum Value, TEnum Flags) noexcept
 {
     return (ToUnderlying(Value) & ToUnderlying(Flags)) == ToUnderlying(Flags);
 }
@@ -50,32 +50,32 @@ NODISCARD constexpr bool HasAllFlags(TEnum Value, TEnum Flags) noexcept
 }  // namespace Zero
 
 #define ZERO_ENABLE_ENUM_FLAGS(EnumType)                      \
-    NODISCARD constexpr std::true_type ZeroEnableEnumFlags(   \
+    ZERO_NODISCARD constexpr std::true_type ZeroEnableEnumFlags(   \
         EnumType) noexcept                                    \
     {                                                         \
         return {};                                            \
     }
 
 template <Zero::CEnumFlags TEnum>
-NODISCARD constexpr TEnum operator|(TEnum Lhs, TEnum Rhs) noexcept
+ZERO_NODISCARD constexpr TEnum operator|(TEnum Lhs, TEnum Rhs) noexcept
 {
     return static_cast<TEnum>(Zero::ToUnderlying(Lhs) | Zero::ToUnderlying(Rhs));
 }
 
 template <Zero::CEnumFlags TEnum>
-NODISCARD constexpr TEnum operator&(TEnum Lhs, TEnum Rhs) noexcept
+ZERO_NODISCARD constexpr TEnum operator&(TEnum Lhs, TEnum Rhs) noexcept
 {
     return static_cast<TEnum>(Zero::ToUnderlying(Lhs) & Zero::ToUnderlying(Rhs));
 }
 
 template <Zero::CEnumFlags TEnum>
-NODISCARD constexpr TEnum operator^(TEnum Lhs, TEnum Rhs) noexcept
+ZERO_NODISCARD constexpr TEnum operator^(TEnum Lhs, TEnum Rhs) noexcept
 {
     return static_cast<TEnum>(Zero::ToUnderlying(Lhs) ^ Zero::ToUnderlying(Rhs));
 }
 
 template <Zero::CEnumFlags TEnum>
-NODISCARD constexpr TEnum operator~(TEnum Value) noexcept
+ZERO_NODISCARD constexpr TEnum operator~(TEnum Value) noexcept
 {
     return static_cast<TEnum>(~Zero::ToUnderlying(Value));
 }

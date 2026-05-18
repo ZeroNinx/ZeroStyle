@@ -1,7 +1,18 @@
 #include "ZeroStyle.h"
 
 #include <cstdlib>
+#include <functional>
+#include <memory>
+#include <type_traits>
 #include <utility>
+
+#ifdef NODISCARD
+#    error "Short macro NODISCARD must not be defined by default."
+#endif
+
+#ifdef REQUIRES
+#    error "Short macro REQUIRES must not be defined by default."
+#endif
 
 using namespace Zero;
 
@@ -13,6 +24,9 @@ static_assert(sizeof(int64)  == 8);
 static_assert(sizeof(uint8)  == 1);
 static_assert(sizeof(uint32) == 4);
 static_assert(sizeof(uint64) == 8);
+static_assert(std::is_same_v<TVector<int32>, std::vector<int32>>);
+static_assert(std::is_same_v<TUniquePtr<int32>, std::unique_ptr<int32>>);
+static_assert(std::is_same_v<TUniquePtr<int32, std::default_delete<int32>>, std::unique_ptr<int32>>);
 
 // --- Concepts 静态断言 ---
 static_assert(CStringLike<String>);
@@ -46,8 +60,16 @@ struct SEmpty
 
 struct SAttributeSmoke
 {
-    NO_UNIQUE_ADDRESS SEmpty Empty;
+    ZERO_NO_UNIQUE_ADDRESS SEmpty Empty;
     int32                    Value = 0;
+};
+
+struct SCountingDelete
+{
+    void operator()(int32* Value) const
+    {
+        delete Value;
+    }
 };
 
 enum class ESmokeFlags : uint32
@@ -77,7 +99,7 @@ int main()
     bool bEnsureSmoke = true;
     ZERO_CHECK(ZERO_ENSURE(bEnsureSmoke));
 
-    MAYBE_UNUSED const int32 UnusedValue = 0;
+    ZERO_MAYBE_UNUSED const int32 UnusedValue = 0;
     SAttributeSmoke AttributeSmoke;
     AttributeSmoke.Value = 1;
     ZERO_CHECK(AttributeSmoke.Value == 1);
@@ -92,11 +114,6 @@ int main()
     ZERO_CHECK(CopiedOkResult.IsOk());
     ZERO_CHECK(CopiedOkResult.Value() == 42);
 
-#if ZERO_HAS_EXPECTED
-    ZERO_CHECK(OkResult.has_value());
-    ZERO_CHECK(*OkResult == 42);
-#endif
-
     // Err 路径
     auto ErrResult = TResult<int32>::Err(
         MakeError(EErrorCode::InvalidArgument, "bad input", "config.json"));
@@ -109,14 +126,9 @@ int main()
     ZERO_CHECK(CopiedErrResult.IsErr());
     ZERO_CHECK(CopiedErrResult.Failure().Code == EErrorCode::InvalidArgument);
 
-#if ZERO_HAS_EXPECTED
-    ZERO_CHECK(!ErrResult.has_value());
-    ZERO_CHECK(ErrResult.error().Code == EErrorCode::InvalidArgument);
-#endif
-
     // TVoidResult
-    TVoidResult<> OkVoid = TVoidResult<>::Ok(SUnit{});
-    ZERO_CHECK(OkVoid.IsOk());
+    TVoidResult<> VoidResult = OkVoid();
+    ZERO_CHECK(VoidResult.IsOk());
 
     // Move-only 值
     auto MoveResult = TResult<SMoveOnly>::Ok(SMoveOnly{7});
@@ -131,6 +143,18 @@ int main()
 
     ZERO_CHECK(Vec.size() == 3);
     ZERO_CHECK(Map["hello"] == 1);
+
+    TVector<int32, std::allocator<int32>> CustomAllocatedVec = {4, 5};
+    TMap<int32, String, std::greater<int32>> CustomCompareMap;
+    THashMap<String, int32, std::hash<String>, std::equal_to<String>> CustomHashMap;
+    TUniquePtr<int32, SCountingDelete> CustomDeletePtr(new int32(9));
+
+    CustomCompareMap.emplace(1, "one");
+    CustomHashMap.emplace("nine", *CustomDeletePtr);
+
+    ZERO_CHECK(CustomAllocatedVec.size() == 2);
+    ZERO_CHECK(CustomCompareMap.begin()->first == 1);
+    ZERO_CHECK(CustomHashMap["nine"] == 9);
 
     // ScopeExit
     bool bScopeExitRan = false;
@@ -187,6 +211,15 @@ int main()
     ZERO_CHECK(PartsWithEmpty.size() == 3);
     ZERO_CHECK(PartsWithEmpty[1].empty());
 
+    const TVector<String> OwnedParts = Split(String("a,,b"), ',');
+    ZERO_CHECK(OwnedParts.size() == 2);
+    ZERO_CHECK(OwnedParts[0] == "a");
+    ZERO_CHECK(OwnedParts[1] == "b");
+
+    const TVector<String> OwnedPartsWithEmpty = Split(String("a,,b"), ',', true);
+    ZERO_CHECK(OwnedPartsWithEmpty.size() == 3);
+    ZERO_CHECK(OwnedPartsWithEmpty[1].empty());
+
     // PathUtils
     const Path ConfigPath = "Config/Default.json";
     ZERO_CHECK(ToGenericString(ConfigPath) == "Config/Default.json");
@@ -201,7 +234,7 @@ int main()
     {
     case 0:
         FallthroughValue += 1;
-        FALLTHROUGH;
+        ZERO_FALLTHROUGH;
     case 1:
         FallthroughValue += 2;
         break;

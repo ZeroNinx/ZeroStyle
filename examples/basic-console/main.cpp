@@ -6,12 +6,12 @@
 
 namespace Example {
 
-struct NODISCARD_TYPE SConfig
+struct ZERO_NODISCARD_TYPE SConfig
 {
     String Name;
 };
 
-NODISCARD TResult<SConfig> ParseConfig(String Text)
+ZERO_NODISCARD TResult<SConfig> ParseConfig(String Text)
 {
     constexpr StringView Prefix = "Name=";
 

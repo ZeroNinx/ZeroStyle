@@ -9,7 +9,7 @@
 
 namespace Zero {
 
-NODISCARD inline String ToString(EErrorCode Code)
+ZERO_NODISCARD inline String ToString(EErrorCode Code)
 {
     switch (Code)
     {
@@ -40,7 +40,7 @@ NODISCARD inline String ToString(EErrorCode Code)
     return "Unknown";
 }
 
-NODISCARD inline String FormatError(const SError& Error)
+ZERO_NODISCARD inline String FormatError(const SError& Error)
 {
     String Text = ToString(Error.Code);
 

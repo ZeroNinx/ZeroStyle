@@ -47,7 +47,7 @@ public:
         bActive = false;
     }
 
-    NODISCARD bool IsActive() const noexcept
+    ZERO_NODISCARD bool IsActive() const noexcept
     {
         return bActive;
     }
@@ -58,7 +58,7 @@ private:
 };
 
 template <typename TFunction>
-NODISCARD auto MakeScopeExit(TFunction&& Function)
+ZERO_NODISCARD auto MakeScopeExit(TFunction&& Function)
 {
     return TScopeExit<std::decay_t<TFunction>>(std::forward<TFunction>(Function));
 }

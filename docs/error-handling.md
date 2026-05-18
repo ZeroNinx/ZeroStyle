@@ -1,13 +1,13 @@
 # Error Handling
 
-ZeroStyle 推荐用显式返回值表达可恢复错误。
+ZeroStyle 推荐用显式返回值表达可恢复错误。`TResult` 的公开 API 在 C++20 fallback 与 C++23 `std::expected` 后端下保持一致；C++23 只影响内部存储实现。
 
 ## TResult
 
 当失败需要错误原因时，使用 `TResult<T>`：
 
 ```cpp
-NODISCARD TResult<SConfig> ParseConfig(String Text);
+ZERO_NODISCARD TResult<SConfig> ParseConfig(String Text);
 ```
 
 调用方必须检查结果：
@@ -28,7 +28,16 @@ SConfig Config = std::move(ConfigResult).TakeValue();
 当成功不需要返回值，但失败需要错误原因时，使用 `TVoidResult<>`：
 
 ```cpp
-NODISCARD TVoidResult<> SaveConfig(const SConfig& Config);
+ZERO_NODISCARD TVoidResult<> SaveConfig(const SConfig& Config);
+```
+
+成功返回可以使用 `OkVoid()`：
+
+```cpp
+TVoidResult<> SaveConfig(const SConfig& Config)
+{
+    return OkVoid();
+}
 ```
 
 ## TOptional
@@ -36,7 +45,7 @@ NODISCARD TVoidResult<> SaveConfig(const SConfig& Config);
 当结果只有“有或没有”，且没有错误原因时，使用 `TOptional<T>`：
 
 ```cpp
-NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
+ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
 ```
 
 找不到不一定是错误。需要错误原因时再使用 `TResult<T>`。

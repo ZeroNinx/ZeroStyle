@@ -13,23 +13,15 @@ option(ZERO_BUILD_TESTS  "编译冒烟测试"                          OFF)
 option(ZERO_BUILD_EXAMPLES "编译示例程序"                         OFF)
 option(ZERO_ENABLE_WARNINGS "为 ZeroStyle 自带测试和示例启用警告"   ON)
 option(ZERO_WARNINGS_AS_ERRORS "将 ZeroStyle 自带目标的警告视为错误" OFF)
-
-# ==============================================================================
-# C++ 标准
-# ==============================================================================
-
-if(ZERO_USE_CXX23)
-    set(CMAKE_CXX_STANDARD 23)
-else()
-    set(CMAKE_CXX_STANDARD 20)
-endif()
-
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS        OFF)
+option(ZERO_ENABLE_THREAD_SAFETY_ANALYSIS
+    "为 ZeroStyle 消费者启用 Clang 线程安全分析"
+    OFF)
 
 # Single-config generators (Ninja, Make): honour CMAKE_BUILD_TYPE.
 # Multi-config generators (Visual Studio, Xcode): use --config at build time.
-if(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
+if(CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR
+   AND NOT CMAKE_CONFIGURATION_TYPES
+   AND NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE Release CACHE STRING "Build type" FORCE)
 endif()
 
@@ -76,8 +68,8 @@ else()
     target_compile_features(ZeroStyle INTERFACE cxx_std_20)
 endif()
 
-# Clang 线程安全分析
-if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+# Clang 线程安全分析。默认关闭，避免意外影响消费者。
+if(ZERO_ENABLE_THREAD_SAFETY_ANALYSIS AND CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     target_compile_options(ZeroStyle INTERFACE -Wthread-safety)
 endif()
 
@@ -91,6 +83,11 @@ if(ZERO_BUILD_TESTS)
     target_link_libraries(ZeroStyle_SmokeTest PRIVATE Zero::ZeroStyle)
     zero_apply_project_warnings(ZeroStyle_SmokeTest)
     add_test(NAME SmokeTest COMMAND ZeroStyle_SmokeTest)
+
+    add_executable(ZeroStyle_ShortMacrosSmokeTest test/ShortMacrosSmokeTest.cpp)
+    target_link_libraries(ZeroStyle_ShortMacrosSmokeTest PRIVATE Zero::ZeroStyle)
+    zero_apply_project_warnings(ZeroStyle_ShortMacrosSmokeTest)
+    add_test(NAME ShortMacrosSmokeTest COMMAND ZeroStyle_ShortMacrosSmokeTest)
 endif()
 
 # ==============================================================================

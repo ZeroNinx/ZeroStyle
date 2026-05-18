@@ -59,7 +59,7 @@ struct SError
     Path       ContextPath;
 };
 
-NODISCARD inline SError MakeError(
+ZERO_NODISCARD inline SError MakeError(
     EErrorCode Code,
     String     Message,
     Path       ContextPath = {})

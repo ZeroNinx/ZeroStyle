@@ -15,7 +15,7 @@
 
 namespace Zero::Detail {
 
-NORETURN inline void FailCheck(
+ZERO_NORETURN inline void FailCheck(
     const char* Expression,
     const char* File,
     int         Line) noexcept
@@ -41,7 +41,7 @@ inline bool FailEnsure(
     return false;
 }
 
-NORETURN inline void FailUnreachable(
+ZERO_NORETURN inline void FailUnreachable(
     const char* File,
     int         Line) noexcept
 {

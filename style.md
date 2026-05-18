@@ -923,50 +923,59 @@ Window.Open(EOpenMode::ReadWrite, ECreatePolicy::CreateIfMissing);
 
 ### 使用标准属性宏
 
-返回错误、状态、资源句柄、查找结果的函数必须使用 `NODISCARD`。
+返回错误、状态、资源句柄、查找结果的函数必须使用属性宏。公共头文件优先使用默认的 `ZERO_` 前缀宏。
 
 ```cpp
-NODISCARD TResult<ZTexture> LoadTexture(const Path& FilePath);
-NODISCARD bool ContainsAsset(StringView Name) const;
-NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
+ZERO_NODISCARD TResult<ZTexture> LoadTexture(const Path& FilePath);
+ZERO_NODISCARD bool ContainsAsset(StringView Name) const;
+ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
 ```
 
-类型本身不应被调用点忽略时，使用 `NODISCARD_TYPE`。
+类型本身不应被调用点忽略时，使用 `ZERO_NODISCARD_TYPE`。
 
 ```cpp
-struct NODISCARD_TYPE SParseToken
+struct ZERO_NODISCARD_TYPE SParseToken
 {
     String Text;
 };
 ```
 
-项目代码不直接写 `[[nodiscard]]`，统一使用 `NODISCARD` 或 `NODISCARD_TYPE`。
+项目代码不直接写 `[[nodiscard]]`，统一使用 `ZERO_NODISCARD` 或 `ZERO_NODISCARD_TYPE`。
+
+个人项目如果希望保持更短的书写风格，可以在包含 ZeroStyle 前显式定义 `ZERO_ENABLE_SHORT_MACROS`。短宏只适合个人项目或受控边界，不作为默认低侵入接口。
+
+```cpp
+#define ZERO_ENABLE_SHORT_MACROS
+#include "ZeroStyle.h"
+
+NODISCARD TResult<ZTexture> LoadTexture(const Path& FilePath);
+```
 
 其他标准属性也统一使用 ZeroStyle 提供的属性宏，保持项目视觉风格一致。
 
 | 宏 | 对应标准属性 | 用途 |
 |---|---|---|
-| `NODISCARD` | `[[nodiscard]]` | 函数返回值不应被忽略 |
-| `NODISCARD_TYPE` | `[[nodiscard]]` | 类型值不应被忽略 |
-| `NORETURN` | `[[noreturn]]` | 函数不会返回调用点 |
-| `MAYBE_UNUSED` | `[[maybe_unused]]` | 明确允许实体未使用 |
-| `DEPRECATED` | `[[deprecated]]` | 标记 API 已废弃 |
-| `DEPRECATED_MSG("reason")` | `[[deprecated("reason")]]` | 带说明的废弃标记 |
-| `FALLTHROUGH` | `[[fallthrough]]` | `switch` 中有意贯穿 |
-| `NO_UNIQUE_ADDRESS` | `[[no_unique_address]]` | 允许空成员不占用额外存储 |
+| `ZERO_NODISCARD` | `[[nodiscard]]` | 函数返回值不应被忽略 |
+| `ZERO_NODISCARD_TYPE` | `[[nodiscard]]` | 类型值不应被忽略 |
+| `ZERO_NORETURN` | `[[noreturn]]` | 函数不会返回调用点 |
+| `ZERO_MAYBE_UNUSED` | `[[maybe_unused]]` | 明确允许实体未使用 |
+| `ZERO_DEPRECATED` | `[[deprecated]]` | 标记 API 已废弃 |
+| `ZERO_DEPRECATED_MSG("reason")` | `[[deprecated("reason")]]` | 带说明的废弃标记 |
+| `ZERO_FALLTHROUGH` | `[[fallthrough]]` | `switch` 中有意贯穿 |
+| `ZERO_NO_UNIQUE_ADDRESS` | `[[no_unique_address]]` | 允许空成员不占用额外存储 |
 
 好的做法：
 
 ```cpp
-NORETURN void AbortWithMessage(StringView Message);
+ZERO_NORETURN void AbortWithMessage(StringView Message);
 
-void VisitToken(MAYBE_UNUSED StringView Token);
+void VisitToken(ZERO_MAYBE_UNUSED StringView Token);
 
 switch (Kind)
 {
 case ETokenKind::Whitespace:
     SkipWhitespace();
-    FALLTHROUGH;
+    ZERO_FALLTHROUGH;
 case ETokenKind::Comment:
     SkipTrivia();
     break;
@@ -1162,7 +1171,7 @@ ZAssetManifest Manifest = std::move(ManifestResult).TakeValue();
 
 ### std::expected 升级路径
 
-若项目启用 C++23 且标准库提供 `std::expected`，`TResult<TValue, TError>` 会继承 `std::expected<TValue, TError>`，保留 PascalCase API 的同时开放标准接口。
+若项目启用 C++23 且标准库提供 `std::expected`，`TResult<TValue, TError>` 会在内部使用 `std::expected` 存储；公开 API 仍保持 ZeroStyle 的 PascalCase 接口，避免 C++20 与 C++23 下调用方式不一致。
 
 ```cpp
 auto PathResult = Database.ResolveAssetPath("PlayerIcon");
@@ -1175,18 +1184,6 @@ if (PathResult.IsErr())
 
 auto AssetPath = std::move(PathResult).TakeValue();
 ```
-
-C++23 原生接口也可用：
-
-```cpp
-if (!PathResult)
-{
-    LogError(PathResult.error().Message);
-    return;
-}
-```
-
----
 
 ### 使用 TOptional<T> 表达“没有”
 
@@ -1417,12 +1414,12 @@ NODISCARD TVoidResult<> Open(Path ManifestPath);
 class ZEventBus
 {
 public:
-    void Publish(SEvent Event) EXCLUDES(Mutex);
-    void Subscribe(ZEventHandler Handler) EXCLUDES(Mutex);
+    void Publish(SEvent Event) ZERO_EXCLUDES(Mutex);
+    void Subscribe(ZEventHandler Handler) ZERO_EXCLUDES(Mutex);
 
 private:
     mutable std::mutex Mutex;
-    TVector<ZEventHandler> Handlers GUARDED_BY(Mutex);
+    TVector<ZEventHandler> Handlers ZERO_GUARDED_BY(Mutex);
 };
 ```
 
@@ -1435,7 +1432,7 @@ public:
 };
 ```
 
-`GUARDED_BY` / `EXCLUDES` / `REQUIRES` 宏由 `ZeroStyle.h` 提供，Clang 下启用 `-Wthread-safety` 可获得静态分析支持，其余编译器下宏展开为空。
+`ZERO_GUARDED_BY` / `ZERO_EXCLUDES` / `ZERO_REQUIRES` 宏由 `ZeroStyle.h` 提供。Clang 线程安全分析默认不强加给消费者，需要通过 CMake 选项显式启用。
 
 ---
 

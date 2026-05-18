@@ -55,8 +55,8 @@ using Path        = std::filesystem::path;
 template <typename TValue>
 using TOptional = std::optional<TValue>;
 
-template <typename TValue>
-using TUniquePtr = std::unique_ptr<TValue>;
+template <typename TValue, typename TDeleter = std::default_delete<TValue>>
+using TUniquePtr = std::unique_ptr<TValue, TDeleter>;
 
 template <typename TValue>
 using TSharedPtr = std::shared_ptr<TValue>;
@@ -66,45 +66,55 @@ using TWeakPtr = std::weak_ptr<TValue>;
 
 // --- 序列容器 ---
 
-template <typename TValue>
-using TVector = std::vector<TValue>;
+template <typename TValue, typename TAllocator = std::allocator<TValue>>
+using TVector = std::vector<TValue, TAllocator>;
 
 template <typename TValue, std::size_t Size>
 using TArray = std::array<TValue, Size>;
 
-template <typename TValue>
-using TDeque = std::deque<TValue>;
+template <typename TValue, typename TAllocator = std::allocator<TValue>>
+using TDeque = std::deque<TValue, TAllocator>;
 
-template <typename TValue>
-using TList = std::list<TValue>;
+template <typename TValue, typename TAllocator = std::allocator<TValue>>
+using TList = std::list<TValue, TAllocator>;
 
-template <typename TValue>
-using TQueue = std::queue<TValue>;
+template <typename TValue, typename TContainer = std::deque<TValue>>
+using TQueue = std::queue<TValue, TContainer>;
 
-template <typename TValue>
-using TStack = std::stack<TValue>;
+template <typename TValue, typename TContainer = std::deque<TValue>>
+using TStack = std::stack<TValue, TContainer>;
 
 template <typename TFirst, typename TSecond>
 using TPair = std::pair<TFirst, TSecond>;
 
 // --- 关联容器 ---
 
-template <typename TKey, typename TValue,
-          typename TCompare = std::less<TKey>>
-using TMap = std::map<TKey, TValue, TCompare>;
+template <
+    typename TKey,
+    typename TValue,
+    typename TCompare   = std::less<TKey>,
+    typename TAllocator = std::allocator<std::pair<const TKey, TValue>>>
+using TMap = std::map<TKey, TValue, TCompare, TAllocator>;
 
-template <typename TKey, typename TValue,
-          typename THash  = std::hash<TKey>,
-          typename TEqual = std::equal_to<TKey>>
-using THashMap = std::unordered_map<TKey, TValue, THash, TEqual>;
+template <
+    typename TKey,
+    typename TValue,
+    typename THash      = std::hash<TKey>,
+    typename TEqual     = std::equal_to<TKey>,
+    typename TAllocator = std::allocator<std::pair<const TKey, TValue>>>
+using THashMap = std::unordered_map<TKey, TValue, THash, TEqual, TAllocator>;
 
-template <typename TValue,
-          typename TCompare = std::less<TValue>>
-using TSet = std::set<TValue, TCompare>;
+template <
+    typename TValue,
+    typename TCompare   = std::less<TValue>,
+    typename TAllocator = std::allocator<TValue>>
+using TSet = std::set<TValue, TCompare, TAllocator>;
 
-template <typename TValue,
-          typename THash  = std::hash<TValue>,
-          typename TEqual = std::equal_to<TValue>>
-using THashSet = std::unordered_set<TValue, THash, TEqual>;
+template <
+    typename TValue,
+    typename THash      = std::hash<TValue>,
+    typename TEqual     = std::equal_to<TValue>,
+    typename TAllocator = std::allocator<TValue>>
+using THashSet = std::unordered_set<TValue, THash, TEqual, TAllocator>;
 
 }  // namespace Zero
