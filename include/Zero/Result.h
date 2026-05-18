@@ -111,8 +111,8 @@ public:
     }
 
 private:
-    struct SOkTag final {};
-    struct SErrTag final {};
+    struct SOkTag {};
+    struct SErrTag {};
 
     explicit TResult(SOkTag, TValue Value)
         : Storage(std::in_place_index<0>, std::move(Value))

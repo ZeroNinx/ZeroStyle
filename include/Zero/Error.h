@@ -20,7 +20,7 @@ namespace Zero {
 // SUnit — 表示“无值成功”，用于 TVoidResult
 // =============================================================================
 
-struct SUnit final
+struct SUnit
 {
     constexpr bool operator==(const SUnit&) const noexcept { return true; }
 };
@@ -52,7 +52,7 @@ enum class EErrorCode
 // SError — 携带 Code、Message、ContextPath 的错误值
 // =============================================================================
 
-struct SError final
+struct SError
 {
     EErrorCode Code = EErrorCode::Unknown;
     String     Message;

@@ -24,7 +24,7 @@ static_assert(CHashable<String>);
 static_assert(CHashable<int32>);
 static_assert(CErrorType<SError>);
 
-struct SMoveOnly final
+struct SMoveOnly
 {
     explicit SMoveOnly(int32 InitialValue)
         : Value(InitialValue)
@@ -40,11 +40,11 @@ struct SMoveOnly final
     int32 Value = 0;
 };
 
-struct SEmpty final
+struct SEmpty
 {
 };
 
-struct SAttributeSmoke final
+struct SAttributeSmoke
 {
     NO_UNIQUE_ADDRESS SEmpty Empty;
     int32                    Value = 0;

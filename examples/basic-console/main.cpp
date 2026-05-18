@@ -6,7 +6,7 @@
 
 namespace Example {
 
-struct NODISCARD_TYPE SConfig final
+struct NODISCARD_TYPE SConfig
 {
     String Name;
 };

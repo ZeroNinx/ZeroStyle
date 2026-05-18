@@ -35,7 +35,7 @@
 好的做法：
 
 ```cpp
-class ZTextureLoader final
+class ZTextureLoader
 {
 public:
     TResult<ZTexture> LoadFromFile(const Path& FilePath);
@@ -197,7 +197,7 @@ private:
 可以封装的情况：
 
 ```cpp
-class ZEmailAddress final
+class ZEmailAddress
 {
 public:
     static TResult<ZEmailAddress> Parse(StringView Text);
@@ -375,7 +375,7 @@ include 顺序如下：
 ```cpp
 class IFileSystem;
 
-class ZAssetDatabase final
+class ZAssetDatabase
 {
 public:
     explicit ZAssetDatabase(const IFileSystem& FileSystemRef);
@@ -554,7 +554,7 @@ Path Path;
 成员变量使用 `PascalCase`，不使用 `m_` 或尾随下划线。输入参数使用普通 `PascalCase` 语义名；当参数名会与成员变量冲突时，使用 `New`、`Initial`、`Source`、`File` 等语义词，而不是强制添加 `In`。
 
 ```cpp
-class ZUser final
+class ZUser
 {
 public:
     explicit ZUser(ZAddress NewAddress)
@@ -677,7 +677,7 @@ inline constexpr StringView DefaultManifestName = "Assets.manifest";
 ```cpp
 namespace Zero {
 
-class ZAssetDatabase final
+class ZAssetDatabase
 {
 };
 
@@ -707,7 +707,7 @@ using namespace fmt;
 当类型主要表示数据集合且成员可以公开访问时，使用 `struct`，并加 `S` 前缀。当类型维护不变量、管理资源或提供行为时，使用 `class`，并加 `Z` 前缀。
 
 ```cpp
-struct SAssetRecord final
+struct SAssetRecord
 {
     String Name;
     Path RelativePath;
@@ -716,7 +716,7 @@ struct SAssetRecord final
 ```
 
 ```cpp
-class ZAssetDatabase final
+class ZAssetDatabase
 {
 public:
     NODISCARD TVoidResult<> Open(Path ManifestPath);
@@ -745,13 +745,35 @@ public:
 
 ### final
 
-默认将非继承设计的类和结构体标记为 `final`。
+`final` 用于表达明确的继承边界，不作为默认样板。
+
+只有当类型确实不应被继承，或需要禁止进一步派生以保护不变量、资源生命周期、ABI/插件边界时，才使用 `final`。普通数据 `struct`、示例类型、尚未稳定的业务类不强制写 `final`。
 
 ```cpp
 class ZNativeFileSystem final : public IFileSystem
 {
 public:
     TResult<String> ReadTextFile(const Path& FilePath) const override;
+};
+```
+
+不推荐：
+
+```cpp
+struct SAssetRecord final
+{
+    String Name;
+    Path RelativePath;
+};
+```
+
+更轻量：
+
+```cpp
+struct SAssetRecord
+{
+    String Name;
+    Path RelativePath;
 };
 ```
 
@@ -762,7 +784,7 @@ public:
 单参数构造函数默认使用 `explicit`。
 
 ```cpp
-class ZAssetDatabase final
+class ZAssetDatabase
 {
 public:
     explicit ZAssetDatabase(const IFileSystem& FileSystemRef);
@@ -776,7 +798,7 @@ public:
 拥有资源、绑定外部依赖或维护复杂状态的类，应显式声明拷贝和移动策略。
 
 ```cpp
-class ZAssetDatabase final
+class ZAssetDatabase
 {
 public:
     ZAssetDatabase(const ZAssetDatabase&) = delete;
@@ -800,7 +822,7 @@ public:
 5. `private` 数据成员。
 
 ```cpp
-class ZTextureLoader final
+class ZTextureLoader
 {
 public:
     explicit ZTextureLoader(IFileSystem& FileSystemRef);
@@ -912,7 +934,7 @@ NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
 类型本身不应被调用点忽略时，使用 `NODISCARD_TYPE`。
 
 ```cpp
-struct NODISCARD_TYPE SParseToken final
+struct NODISCARD_TYPE SParseToken
 {
     String Text;
 };
@@ -993,7 +1015,7 @@ using Zero::int32;
 
 namespace Project {
 
-struct SConfig final
+struct SConfig
 {
     String Name;
 };
@@ -1066,7 +1088,7 @@ if (!Record.has_value())
 优先在声明处初始化变量。成员变量应使用默认成员初始化器。
 
 ```cpp
-struct STextureInfo final
+struct STextureInfo
 {
     int32 Width = 0;
     int32 Height = 0;
@@ -1191,7 +1213,7 @@ enum class EErrorCode
     AssetNotFound,
 };
 
-struct SError final
+struct SError
 {
     EErrorCode Code;
     String Message;
@@ -1249,7 +1271,7 @@ private:
 ```cpp
 TUniquePtr<ZTexture> CreateTexture(STextureDesc Desc);
 
-class ZRenderer final
+class ZRenderer
 {
 public:
     explicit ZRenderer(IFileSystem& FileSystemRef);
@@ -1268,7 +1290,7 @@ private:
 全局可变状态会降低可测试性和可推理性。优先使用依赖注入。
 
 ```cpp
-class ZAssetDatabase final
+class ZAssetDatabase
 {
 public:
     explicit ZAssetDatabase(const IFileSystem& FileSystemRef);
@@ -1392,7 +1414,7 @@ NODISCARD TVoidResult<> Open(Path ManifestPath);
 
 ```cpp
 // Thread-safe.
-class ZEventBus final
+class ZEventBus
 {
 public:
     void Publish(SEvent Event) EXCLUDES(Mutex);
@@ -1406,7 +1428,7 @@ private:
 
 ```cpp
 // Not thread-safe. External synchronization required.
-class ZAssetDatabase final
+class ZAssetDatabase
 {
 public:
     NODISCARD TVoidResult<> Open(Path ManifestPath);
@@ -1476,7 +1498,7 @@ TEST(asset_database, bad)
 
 namespace Project {
 
-struct SAssetRecord final
+struct SAssetRecord
 {
     String Name;
     Path RelativePath;
@@ -1491,7 +1513,7 @@ public:
     NODISCARD virtual TResult<String> ReadTextFile(const Path& FilePath) const = 0;
 };
 
-class ZAssetManifest final
+class ZAssetManifest
 {
 public:
     NODISCARD bool ContainsAsset(StringView Name) const
@@ -1538,7 +1560,7 @@ private:
     THashMap<String, SAssetRecord> RecordsByName;
 };
 
-class ZAssetDatabase final
+class ZAssetDatabase
 {
 public:
     explicit ZAssetDatabase(const IFileSystem& FileSystemRef)
