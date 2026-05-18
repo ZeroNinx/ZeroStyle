@@ -899,7 +899,7 @@ Window.Open(EOpenMode::ReadWrite, ECreatePolicy::CreateIfMissing);
 
 ---
 
-### 使用 NODISCARD
+### 使用标准属性宏
 
 返回错误、状态、资源句柄、查找结果的函数必须使用 `NODISCARD`。
 
@@ -907,6 +907,100 @@ Window.Open(EOpenMode::ReadWrite, ECreatePolicy::CreateIfMissing);
 NODISCARD TResult<ZTexture> LoadTexture(const Path& FilePath);
 NODISCARD bool ContainsAsset(StringView Name) const;
 NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
+```
+
+类型本身不应被调用点忽略时，使用 `NODISCARD_TYPE`。
+
+```cpp
+struct NODISCARD_TYPE SParseToken final
+{
+    String Text;
+};
+```
+
+项目代码不直接写 `[[nodiscard]]`，统一使用 `NODISCARD` 或 `NODISCARD_TYPE`。
+
+其他标准属性也统一使用 ZeroStyle 提供的属性宏，保持项目视觉风格一致。
+
+| 宏 | 对应标准属性 | 用途 |
+|---|---|---|
+| `NODISCARD` | `[[nodiscard]]` | 函数返回值不应被忽略 |
+| `NODISCARD_TYPE` | `[[nodiscard]]` | 类型值不应被忽略 |
+| `NORETURN` | `[[noreturn]]` | 函数不会返回调用点 |
+| `MAYBE_UNUSED` | `[[maybe_unused]]` | 明确允许实体未使用 |
+| `DEPRECATED` | `[[deprecated]]` | 标记 API 已废弃 |
+| `DEPRECATED_MSG("reason")` | `[[deprecated("reason")]]` | 带说明的废弃标记 |
+| `FALLTHROUGH` | `[[fallthrough]]` | `switch` 中有意贯穿 |
+| `NO_UNIQUE_ADDRESS` | `[[no_unique_address]]` | 允许空成员不占用额外存储 |
+
+好的做法：
+
+```cpp
+NORETURN void AbortWithMessage(StringView Message);
+
+void VisitToken(MAYBE_UNUSED StringView Token);
+
+switch (Kind)
+{
+case ETokenKind::Whitespace:
+    SkipWhitespace();
+    FALLTHROUGH;
+case ETokenKind::Comment:
+    SkipTrivia();
+    break;
+default:
+    break;
+}
+```
+
+不推荐：
+
+```cpp
+[[noreturn]] void AbortWithMessage(StringView Message);
+[[maybe_unused]] StringView Token;
+```
+
+---
+
+### 项目公共头
+
+推荐每个项目建立自己的公共基础头，例如 `ProjectCore.h`，在项目命名空间内选择性转发 ZeroStyle 类型。公共头文件不要写 `using namespace Zero;`。
+
+```cpp
+#pragma once
+
+#include "ZeroStyle.h"
+
+namespace Project {
+
+using Zero::Path;
+using Zero::String;
+using Zero::StringView;
+using Zero::TOptional;
+using Zero::TResult;
+using Zero::TVector;
+using Zero::int32;
+
+}  // namespace Project
+```
+
+业务头文件包含项目公共头后，可以使用项目自己的风格入口。
+
+```cpp
+#pragma once
+
+#include "ProjectCore.h"
+
+namespace Project {
+
+struct SConfig final
+{
+    String Name;
+};
+
+NODISCARD TResult<SConfig> ParseConfig(String Text);
+
+}  // namespace Project
 ```
 
 ---

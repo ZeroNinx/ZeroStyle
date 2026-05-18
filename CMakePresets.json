@@ -1,0 +1,214 @@
+{
+    "version": 2,
+    "cmakeMinimumRequired": {
+        "major": 3,
+        "minor": 20,
+        "patch": 0
+    },
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Visual Studio 17 2022",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ZERO_ENABLE_WARNINGS": "ON",
+                "ZERO_WARNINGS_AS_ERRORS": "OFF"
+            }
+        },
+        {
+            "name": "dev",
+            "inherits": "base",
+            "displayName": "Dev",
+            "description": "C++20 build with tests and examples.",
+            "cacheVariables": {
+                "ZERO_USE_CXX23": "OFF",
+                "ZERO_BUILD_TESTS": "ON",
+                "ZERO_BUILD_EXAMPLES": "ON"
+            }
+        },
+        {
+            "name": "dev-cxx23",
+            "inherits": "base",
+            "displayName": "Dev C++23",
+            "description": "C++23 build with tests and examples.",
+            "cacheVariables": {
+                "ZERO_USE_CXX23": "ON",
+                "ZERO_BUILD_TESTS": "ON",
+                "ZERO_BUILD_EXAMPLES": "ON"
+            }
+        },
+        {
+            "name": "release",
+            "inherits": "base",
+            "displayName": "Release",
+            "description": "C++20 library configure without tests or examples.",
+            "cacheVariables": {
+                "ZERO_USE_CXX23": "OFF",
+                "ZERO_BUILD_TESTS": "OFF",
+                "ZERO_BUILD_EXAMPLES": "OFF",
+                "ZERO_ENABLE_WARNINGS": "OFF"
+            }
+        },
+        {
+            "name": "ninja-base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
+                "ZERO_ENABLE_WARNINGS": "ON",
+                "ZERO_WARNINGS_AS_ERRORS": "OFF",
+                "ZERO_BUILD_TESTS": "ON",
+                "ZERO_BUILD_EXAMPLES": "ON"
+            }
+        },
+        {
+            "name": "ninja-gcc",
+            "inherits": "ninja-base",
+            "displayName": "Ninja GCC",
+            "description": "C++20 build with GCC, tests, and examples.",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++",
+                "ZERO_USE_CXX23": "OFF"
+            }
+        },
+        {
+            "name": "ninja-gcc-cxx23",
+            "inherits": "ninja-base",
+            "displayName": "Ninja GCC C++23",
+            "description": "C++23 build with GCC, tests, and examples.",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "g++",
+                "ZERO_USE_CXX23": "ON"
+            }
+        },
+        {
+            "name": "ninja-clang",
+            "inherits": "ninja-base",
+            "displayName": "Ninja Clang",
+            "description": "C++20 build with Clang, tests, and examples.",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++",
+                "ZERO_USE_CXX23": "OFF"
+            }
+        },
+        {
+            "name": "ninja-clang-cxx23",
+            "inherits": "ninja-base",
+            "displayName": "Ninja Clang C++23",
+            "description": "C++23 build with Clang, tests, and examples.",
+            "cacheVariables": {
+                "CMAKE_CXX_COMPILER": "clang++",
+                "ZERO_USE_CXX23": "ON"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "dev",
+            "configurePreset": "dev",
+            "configuration": "Release"
+        },
+        {
+            "name": "dev-debug",
+            "configurePreset": "dev",
+            "configuration": "Debug"
+        },
+        {
+            "name": "dev-cxx23",
+            "configurePreset": "dev-cxx23",
+            "configuration": "Release"
+        },
+        {
+            "name": "dev-cxx23-debug",
+            "configurePreset": "dev-cxx23",
+            "configuration": "Debug"
+        },
+        {
+            "name": "release",
+            "configurePreset": "release",
+            "configuration": "Release"
+        },
+        {
+            "name": "ninja-gcc",
+            "configurePreset": "ninja-gcc"
+        },
+        {
+            "name": "ninja-gcc-cxx23",
+            "configurePreset": "ninja-gcc-cxx23"
+        },
+        {
+            "name": "ninja-clang",
+            "configurePreset": "ninja-clang"
+        },
+        {
+            "name": "ninja-clang-cxx23",
+            "configurePreset": "ninja-clang-cxx23"
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "dev",
+            "configurePreset": "dev",
+            "configuration": "Release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "dev-debug",
+            "configurePreset": "dev",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "dev-cxx23",
+            "configurePreset": "dev-cxx23",
+            "configuration": "Release",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "dev-cxx23-debug",
+            "configurePreset": "dev-cxx23",
+            "configuration": "Debug",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ninja-gcc",
+            "configurePreset": "ninja-gcc",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ninja-gcc-cxx23",
+            "configurePreset": "ninja-gcc-cxx23",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ninja-clang",
+            "configurePreset": "ninja-clang",
+            "output": {
+                "outputOnFailure": true
+            }
+        },
+        {
+            "name": "ninja-clang-cxx23",
+            "configurePreset": "ninja-clang-cxx23",
+            "output": {
+                "outputOnFailure": true
+            }
+        }
+    ]
+}

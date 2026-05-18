@@ -38,3 +38,24 @@
 
 /// [[nodiscard]] 快捷宏。返回错误、状态、资源句柄的函数应使用此宏。
 #define NODISCARD [[nodiscard]]
+
+/// 类型级 [[nodiscard]] 快捷宏。用于不应被调用点忽略的轻量值类型。
+#define NODISCARD_TYPE [[nodiscard]]
+
+/// [[noreturn]] 快捷宏。用于声明不会返回调用点的函数。
+#define NORETURN [[noreturn]]
+
+/// [[maybe_unused]] 快捷宏。用于明确允许未使用的变量、参数、函数或类型。
+#define MAYBE_UNUSED [[maybe_unused]]
+
+/// [[deprecated]] 快捷宏。用于标记不推荐继续使用的 API。
+#define DEPRECATED [[deprecated]]
+
+/// 带说明文本的 [[deprecated("message")]] 快捷宏。
+#define DEPRECATED_MSG(Message) [[deprecated(Message)]]
+
+/// [[fallthrough]] 快捷宏。用于 switch case 的有意贯穿。
+#define FALLTHROUGH [[fallthrough]]
+
+/// [[no_unique_address]] 快捷宏。用于允许空成员不占用额外存储。
+#define NO_UNIQUE_ADDRESS [[no_unique_address]]

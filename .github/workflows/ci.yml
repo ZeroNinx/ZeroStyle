@@ -1,0 +1,71 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  windows-msvc:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure C++20
+        run: cmake --preset dev
+
+      - name: Build C++20
+        run: cmake --build --preset dev
+
+      - name: Test C++20
+        run: ctest --preset dev
+
+      - name: Configure C++23
+        run: cmake --preset dev-cxx23
+
+      - name: Build C++23
+        run: cmake --build --preset dev-cxx23
+
+      - name: Test C++23
+        run: ctest --preset dev-cxx23
+
+      - name: Install
+        run: cmake --install build/dev --prefix build/install
+
+      - name: Configure Package Consumer
+        shell: pwsh
+        run: |
+          $prefix = (Resolve-Path build/install).Path
+          cmake -S examples/package-consumer -B build/package-consumer -DCMAKE_PREFIX_PATH="$prefix"
+
+      - name: Build Package Consumer
+        run: cmake --build build/package-consumer --config Release
+
+  linux-gcc-clang:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        preset:
+          - ninja-gcc
+          - ninja-gcc-cxx23
+          - ninja-clang
+          - ninja-clang-cxx23
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Ninja
+        run: sudo apt-get update && sudo apt-get install -y ninja-build
+
+      - name: Configure
+        run: cmake --preset ${{ matrix.preset }}
+
+      - name: Build
+        run: cmake --build --preset ${{ matrix.preset }}
+
+      - name: Test
+        run: ctest --preset ${{ matrix.preset }}
