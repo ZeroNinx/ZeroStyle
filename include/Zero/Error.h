@@ -45,14 +45,14 @@ enum class EErrorCode
 struct SError
 {
     EErrorCode Code = EErrorCode::Unknown;
-    String     Message;
-    Path       ContextPath;
+    StdString  Message;
+    StdPath    ContextPath;
 };
 
 ZERO_NODISCARD inline SError MakeError(
     EErrorCode Code,
-    String     Message,
-    Path       ContextPath = {})
+    StdString  Message,
+    StdPath    ContextPath = {})
 {
     return SError{
         .Code        = Code,

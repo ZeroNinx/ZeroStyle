@@ -8,12 +8,12 @@ namespace Example {
 
 struct ZERO_NODISCARD_TYPE SConfig
 {
-    String Name;
+    StdString Name;
 };
 
-ZERO_NODISCARD TResult<SConfig> ParseConfig(String Text)
+ZERO_NODISCARD TResult<SConfig> ParseConfig(StdString Text)
 {
-    constexpr StringView Prefix = "Name=";
+    constexpr StdStringView Prefix = "Name=";
 
     if (!Text.starts_with(Prefix))
     {

@@ -38,7 +38,7 @@ int main()
     ZERO_CHECK(ErrResult.IsErr());
     ZERO_CHECK(!ErrResult.IsOk());
     ZERO_CHECK(ErrResult.Failure().Code == EErrorCode::InvalidArgument);
-    ZERO_CHECK(ErrResult.Failure().ContextPath == Path("config.json"));
+    ZERO_CHECK(ErrResult.Failure().ContextPath == StdPath("config.json"));
     ZERO_CHECK(ErrResult.ValueOr(7) == 7);
 
     auto CopiedErrResult = ErrResult;

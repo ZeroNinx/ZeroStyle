@@ -15,7 +15,7 @@ ZERO_NODISCARD constexpr bool IsAsciiWhitespace(char Char) noexcept
            Char == '\f' || Char == '\v';
 }
 
-ZERO_NODISCARD constexpr StringView TrimLeft(StringView Text) noexcept
+ZERO_NODISCARD constexpr StdStringView TrimLeft(StdStringView Text) noexcept
 {
     while (!Text.empty() && IsAsciiWhitespace(Text.front()))
     {
@@ -25,7 +25,7 @@ ZERO_NODISCARD constexpr StringView TrimLeft(StringView Text) noexcept
     return Text;
 }
 
-ZERO_NODISCARD constexpr StringView TrimRight(StringView Text) noexcept
+ZERO_NODISCARD constexpr StdStringView TrimRight(StdStringView Text) noexcept
 {
     while (!Text.empty() && IsAsciiWhitespace(Text.back()))
     {
@@ -35,41 +35,41 @@ ZERO_NODISCARD constexpr StringView TrimRight(StringView Text) noexcept
     return Text;
 }
 
-ZERO_NODISCARD constexpr StringView Trim(StringView Text) noexcept
+ZERO_NODISCARD constexpr StdStringView Trim(StdStringView Text) noexcept
 {
     return TrimRight(TrimLeft(Text));
 }
 
-ZERO_NODISCARD constexpr bool StartsWith(StringView Text, StringView Prefix) noexcept
+ZERO_NODISCARD constexpr bool StartsWith(StdStringView Text, StdStringView Prefix) noexcept
 {
     return Text.starts_with(Prefix);
 }
 
-ZERO_NODISCARD constexpr bool EndsWith(StringView Text, StringView Suffix) noexcept
+ZERO_NODISCARD constexpr bool EndsWith(StdStringView Text, StdStringView Suffix) noexcept
 {
     return Text.ends_with(Suffix);
 }
 
-// 返回的 StringView 指向输入 Text。
+// 返回的 StdStringView 指向输入 Text。
 // 调用方必须保证 Text 指向的数据在返回结果使用期间仍然有效。
-ZERO_NODISCARD inline TVector<StringView> SplitView(
-    StringView Text,
-    char       Delimiter,
-    bool       bKeepEmpty = false)
+ZERO_NODISCARD inline TVector<StdStringView> SplitView(
+    StdStringView Text,
+    char          Delimiter,
+    bool          bKeepEmpty = false)
 {
-    TVector<StringView> Parts;
+    TVector<StdStringView> Parts;
 
     while (true)
     {
-        const std::size_t Position = Text.find(Delimiter);
-        const StringView  Part     = Text.substr(0, Position);
+        const std::size_t  Position = Text.find(Delimiter);
+        const StdStringView Part     = Text.substr(0, Position);
 
         if (bKeepEmpty || !Part.empty())
         {
             Parts.push_back(Part);
         }
 
-        if (Position == StringView::npos)
+        if (Position == StdStringView::npos)
         {
             break;
         }
@@ -80,24 +80,24 @@ ZERO_NODISCARD inline TVector<StringView> SplitView(
     return Parts;
 }
 
-ZERO_NODISCARD inline TVector<String> Split(
-    StringView Text,
-    char       Delimiter,
-    bool       bKeepEmpty = false)
+ZERO_NODISCARD inline TVector<StdString> Split(
+    StdStringView Text,
+    char          Delimiter,
+    bool          bKeepEmpty = false)
 {
-    TVector<String> Parts;
+    TVector<StdString> Parts;
 
     while (true)
     {
-        const std::size_t Position = Text.find(Delimiter);
-        const StringView  Part     = Text.substr(0, Position);
+        const std::size_t  Position = Text.find(Delimiter);
+        const StdStringView Part     = Text.substr(0, Position);
 
         if (bKeepEmpty || !Part.empty())
         {
             Parts.emplace_back(Part);
         }
 
-        if (Position == StringView::npos)
+        if (Position == StdStringView::npos)
         {
             break;
         }

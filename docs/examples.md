@@ -35,15 +35,15 @@ cmake --build build/package-consumer --config Release
 
 ## String Utilities
 
-`SplitView` 返回的 `StringView` 指向输入文本，调用方必须保证输入文本在结果使用期间仍然有效：
+`SplitView` 返回的 `StdStringView` 指向输入文本，调用方必须保证输入文本在结果使用期间仍然有效：
 
 ```cpp
-String Text = "a,b,c";
-TVector<StringView> Parts = SplitView(Text, ',');
+StdString Text = "a,b,c";
+TVector<StdStringView> Parts = SplitView(Text, ',');
 ```
 
 如果需要安全持有拆分结果，使用 owning 版本 `Split`：
 
 ```cpp
-TVector<String> Parts = Split(String("a,b,c"), ',');
+TVector<StdString> Parts = Split(StdString("a,b,c"), ',');
 ```

@@ -7,7 +7,7 @@ ZeroStyle 推荐用显式返回值表达可恢复错误。`TResult` 的公开 AP
 当失败需要错误原因时，使用 `TResult<T>`：
 
 ```cpp
-ZERO_NODISCARD TResult<SConfig> ParseConfig(String Text);
+ZERO_NODISCARD TResult<SConfig> ParseConfig(StdString Text);
 ```
 
 调用方必须检查结果：
@@ -60,7 +60,7 @@ TResult<void> SaveConfig(const SConfig& Config)
 当结果只有“有或没有”，且没有错误原因时，使用 `TOptional<T>`：
 
 ```cpp
-ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
+ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StdStringView Name) const;
 ```
 
 找不到不一定是错误。需要错误原因时再使用 `TResult<T>`。

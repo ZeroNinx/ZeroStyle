@@ -26,8 +26,8 @@ ZeroStyle 不设置全局 `CMAKE_CXX_STANDARD`。默认只通过 `Zero::ZeroStyl
 
 namespace MyProject {
 
-using Zero::Path;
-using Zero::String;
+using Zero::StdPath;
+using Zero::StdString;
 using Zero::TResult;
 using Zero::TVector;
 using Zero::int32;
@@ -47,7 +47,7 @@ using Zero::int32;
 
 using namespace Zero;
 
-NODISCARD TVector<String> BuildNames()
+NODISCARD TVector<StdString> BuildNames()
 {
     return {};
 }

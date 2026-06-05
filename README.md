@@ -52,9 +52,9 @@ target_link_libraries(MyTarget
 
 namespace MyProject {
 
-using Zero::Path;
-using Zero::String;
-using Zero::StringView;
+using Zero::StdPath;
+using Zero::StdString;
+using Zero::StdStringView;
 using Zero::TResult;
 using Zero::TVector;
 using Zero::int32;
@@ -69,7 +69,7 @@ using Zero::int32;
 
 namespace MyProject {
 
-ZERO_NODISCARD TResult<String> LoadText(const Path& FilePath);
+ZERO_NODISCARD TResult<StdString> LoadText(const StdPath& FilePath);
 
 }  // namespace MyProject
 ```
@@ -80,7 +80,7 @@ ZERO_NODISCARD TResult<String> LoadText(const Path& FilePath);
 #define ZERO_ENABLE_SHORT_MACROS
 #include "ZeroStyle.h"
 
-NODISCARD Zero::TResult<Zero::String> LoadText();
+NODISCARD Zero::TResult<Zero::StdString> LoadText();
 ```
 
 如果只需要某一部分，也可以单独包含：

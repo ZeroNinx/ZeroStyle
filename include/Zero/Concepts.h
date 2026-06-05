@@ -16,11 +16,11 @@ namespace Zero {
 
 /// 可隐式转换为 std::string_view 的类型（std::string、const char*、string_view 等）
 template <typename TValue>
-concept CStringLike = std::convertible_to<TValue, StringView>;
+concept CStringLike = std::convertible_to<TValue, StdStringView>;
 
 /// 可构造 std::filesystem::path 的类型
 template <typename TValue>
-concept CPathLike = std::convertible_to<TValue, Path>;
+concept CPathLike = std::convertible_to<TValue, StdPath>;
 
 /// 可用作无序容器键（需要 std::hash 特化和相等运算符）
 template <typename TValue>

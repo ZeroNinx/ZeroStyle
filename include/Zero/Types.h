@@ -4,8 +4,8 @@
 // Zero/Types.h — 基础类型别名
 // =============================================================================
 //
-// 仅提供标准库类型的 PascalCase / T 前缀别名，不做无语义封装。
-// 基础值类型别名不加 Z/S/T；模板类型别名使用 T 前缀。
+// 仅提供标准库类型的 Std 来源前缀别名，不做无语义封装。
+// 非模板别名使用 Std 前缀；模板类型别名使用 T 前缀。
 
 #include <array>
 #include <cstdint>
@@ -44,11 +44,11 @@ using float64 = double;
 
 // --- 字符串 / 路径 ---
 
-using String      = std::string;
-using StringView  = std::string_view;
-using WString     = std::wstring;
-using WStringView = std::wstring_view;
-using Path        = std::filesystem::path;
+using StdString      = std::string;
+using StdStringView  = std::string_view;
+using StdWString     = std::wstring;
+using StdWStringView = std::wstring_view;
+using StdPath        = std::filesystem::path;
 
 // --- 智能指针 / Optional ---
 

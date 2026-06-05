@@ -12,10 +12,10 @@ namespace Example {
 
 using Zero::EErrorCode;
 using Zero::MakeError;
-using Zero::Path;
+using Zero::StdPath;
 using Zero::SError;
-using Zero::String;
-using Zero::StringView;
+using Zero::StdString;
+using Zero::StdStringView;
 using Zero::THashMap;
 using Zero::TOptional;
 using Zero::TResult;

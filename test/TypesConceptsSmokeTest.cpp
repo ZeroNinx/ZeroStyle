@@ -18,12 +18,12 @@ static_assert(std::is_same_v<TVector<int32>, std::vector<int32>>);
 static_assert(std::is_same_v<TUniquePtr<int32>, std::unique_ptr<int32>>);
 static_assert(std::is_same_v<TUniquePtr<int32, std::default_delete<int32>>, std::unique_ptr<int32>>);
 
-static_assert(CStringLike<String>);
-static_assert(CStringLike<StringView>);
+static_assert(CStringLike<StdString>);
+static_assert(CStringLike<StdStringView>);
 static_assert(CStringLike<const char*>);
 static_assert(!CStringLike<int32>);
-static_assert(CPathLike<Path>);
-static_assert(CHashable<String>);
+static_assert(CPathLike<StdPath>);
+static_assert(CHashable<StdString>);
 static_assert(CHashable<int32>);
 static_assert(CErrorType<SError>);
 
@@ -38,15 +38,15 @@ struct SCountingDelete
 int main()
 {
     TVector<int32>          Vec = {1, 2, 3};
-    THashMap<String, int32> Map;
+    THashMap<StdString, int32> Map;
     Map["hello"] = 1;
 
     ZERO_CHECK(Vec.size() == 3);
     ZERO_CHECK(Map["hello"] == 1);
 
     TVector<int32, std::allocator<int32>> CustomAllocatedVec = {4, 5};
-    TMap<int32, String, std::greater<int32>> CustomCompareMap;
-    THashMap<String, int32, std::hash<String>, std::equal_to<String>> CustomHashMap;
+    TMap<int32, StdString, std::greater<int32>> CustomCompareMap;
+    THashMap<StdString, int32, std::hash<StdString>, std::equal_to<StdString>> CustomHashMap;
     TUniquePtr<int32, SCountingDelete> CustomDeletePtr(new int32(9));
 
     CustomCompareMap.emplace(1, "one");

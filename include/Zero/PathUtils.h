@@ -9,19 +9,19 @@
 
 namespace Zero {
 
-ZERO_NODISCARD inline String ToGenericString(const Path& FilePath)
+ZERO_NODISCARD inline StdString ToGenericString(const StdPath& FilePath)
 {
     return FilePath.generic_string();
 }
 
-ZERO_NODISCARD inline Path NormalizeLexically(const Path& FilePath)
+ZERO_NODISCARD inline StdPath NormalizeLexically(const StdPath& FilePath)
 {
     return FilePath.lexically_normal();
 }
 
-ZERO_NODISCARD inline bool HasExtension(const Path& FilePath, StringView Extension)
+ZERO_NODISCARD inline bool HasExtension(const StdPath& FilePath, StdStringView Extension)
 {
-    const String ActualExtension = FilePath.extension().string();
+    const StdString ActualExtension = FilePath.extension().string();
 
     if (Extension.empty())
     {
@@ -35,10 +35,10 @@ ZERO_NODISCARD inline bool HasExtension(const Path& FilePath, StringView Extensi
 
     return ActualExtension.size() == Extension.size() + 1 &&
            ActualExtension.front() == '.' &&
-           StringView(ActualExtension).substr(1) == Extension;
+           StdStringView(ActualExtension).substr(1) == Extension;
 }
 
-ZERO_NODISCARD inline Path WithExtension(Path FilePath, StringView Extension)
+ZERO_NODISCARD inline StdPath WithExtension(StdPath FilePath, StdStringView Extension)
 {
     if (Extension.empty() || Extension.front() == '.')
     {
@@ -46,7 +46,7 @@ ZERO_NODISCARD inline Path WithExtension(Path FilePath, StringView Extension)
         return FilePath;
     }
 
-    String DottedExtension = ".";
+    StdString DottedExtension = ".";
     DottedExtension += Extension;
     FilePath.replace_extension(DottedExtension);
     return FilePath;

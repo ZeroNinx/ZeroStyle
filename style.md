@@ -38,10 +38,10 @@
 class ZTextureLoader
 {
 public:
-    TResult<ZTexture> LoadFromFile(const Path& FilePath);
+    TResult<ZTexture> LoadFromFile(const StdPath& FilePath);
 
 private:
-    Path SourcePath;
+    StdPath SourcePath;
     bool bLoaded = false;
 };
 ```
@@ -51,7 +51,7 @@ private:
 ```cpp
 class texture_loader {
 public:
-    result<texture> load_from_file(const std::filesystem::path& path);
+    result<texture> load_from_file(const std::filesystem::path& file_path);
 
 private:
     std::filesystem::path source_path_;
@@ -72,14 +72,14 @@ private:
 ```cpp
 if (!Database.IsOpen())
 {
-    return TResult<Path>::Err(MakeError(EErrorCode::NotOpen, "database is not open"));
+    return TResult<StdPath>::Err(MakeError(EErrorCode::NotOpen, "database is not open"));
 }
 ```
 
 不好的做法：
 
 ```cpp
-return Database.IsOpen() ? ResolveImpl(Name) : TResult<Path>::Err(MakeError(EErrorCode::NotOpen, ""));
+return Database.IsOpen() ? ResolveImpl(Name) : TResult<StdPath>::Err(MakeError(EErrorCode::NotOpen, ""));
 ```
 
 三目表达式、模板元编程、宏技巧和高度压缩的链式调用都应谨慎使用。
@@ -93,13 +93,13 @@ return Database.IsOpen() ? ResolveImpl(Name) : TResult<Path>::Err(MakeError(EErr
 好的做法：
 
 ```cpp
-ZERO_NODISCARD TResult<Path> ResolveAssetPath(StringView Name) const;
+ZERO_NODISCARD TResult<StdPath> ResolveAssetPath(StdStringView Name) const;
 ```
 
 不好的做法：
 
 ```cpp
-Path Get(StringView Name) const;
+StdPath Get(StdStringView Name) const;
 ```
 
 `ResolveAssetPath` 比 `Get` 更清楚，`TResult<T>` 比隐藏失败条件更清楚，`ZERO_NODISCARD` 能提醒调用者处理结果。
@@ -133,7 +133,7 @@ class TResult;
 class IAddressResolver;
 enum class EAddressKind;
 template <typename TValue>
-concept CStringLike = std::convertible_to<TValue, StringView>;
+concept CStringLike = std::convertible_to<TValue, StdStringView>;
 ```
 
 使用时：
@@ -171,9 +171,9 @@ TVector<ZAddress> Addresses;
 好的做法：
 
 ```cpp
-using String = std::string;
-using StringView = std::string_view;
-using Path = std::filesystem::path;
+using StdString = std::string;
+using StdStringView = std::string_view;
+using StdPath = std::filesystem::path;
 
 template <typename TValue>
 using TVector = std::vector<TValue>;
@@ -200,14 +200,14 @@ private:
 class ZEmailAddress
 {
 public:
-    static TResult<ZEmailAddress> Parse(StringView Text);
-    ZERO_NODISCARD StringView ToString() const noexcept;
+    static TResult<ZEmailAddress> Parse(StdStringView Text);
+    ZERO_NODISCARD StdStringView ToString() const noexcept;
 
 private:
-    explicit ZEmailAddress(String Text);
+    explicit ZEmailAddress(StdString Text);
 
 private:
-    String Text;
+    StdString Text;
 };
 ```
 
@@ -223,9 +223,9 @@ private:
 using int32 = std::int32_t;
 using uint64 = std::uint64_t;
 using float32 = float;
-using String = std::string;
-using StringView = std::string_view;
-using Path = std::filesystem::path;
+using StdString = std::string;
+using StdStringView = std::string_view;
+using StdPath = std::filesystem::path;
 ```
 
 模板型标准库别名使用 `T` 前缀：
@@ -244,11 +244,11 @@ using THashMap = std::unordered_map<TKey, TValue>;
 推荐：
 
 ```cpp
-String Name;
-Path ConfigPath;
+StdString Name;
+StdPath ConfigPath;
 TVector<ZTexture> Textures;
 TOptional<SAssetRecord> Record;
-THashMap<String, ZAddress> Addresses;
+THashMap<StdString, ZAddress> Addresses;
 ```
 
 不推荐：
@@ -420,8 +420,8 @@ void ZAssetDatabase::Close()
 推荐行宽不超过 100 列。复杂函数签名应换行。
 
 ```cpp
-ZERO_NODISCARD TResult<Path> ResolveAssetPath(
-    StringView Name,
+ZERO_NODISCARD TResult<StdPath> ResolveAssetPath(
+    StdStringView Name,
     EResolveFlags Flags) const;
 ```
 
@@ -432,7 +432,7 @@ ZERO_NODISCARD TResult<Path> ResolveAssetPath(
 `*` 和 `&` 靠近类型。
 
 ```cpp
-ZTexture* FindTexture(StringView Name);
+ZTexture* FindTexture(StdStringView Name);
 const ZTexture& GetDefaultTexture() const;
 ```
 
@@ -447,10 +447,10 @@ const auto Record = Manifest.FindAsset(Name);
 
 if (!Record.has_value())
 {
-    return TResult<Path>::Err(MakeError(EErrorCode::AssetNotFound, "asset not found"));
+    return TResult<StdPath>::Err(MakeError(EErrorCode::AssetNotFound, "asset not found"));
 }
 
-return TResult<Path>::Ok(BasePath / Record->RelativePath);
+return TResult<StdPath>::Ok(BasePath / Record->RelativePath);
 ```
 
 ---
@@ -469,14 +469,14 @@ class TResult;
 class IFileSystem;
 enum class ETextureFormat;
 template <typename TValue>
-concept CStringLike = std::convertible_to<TValue, StringView>;
+concept CStringLike = std::convertible_to<TValue, StdStringView>;
 ```
 
 类型别名分两类：
 
 ```cpp
-using String = std::string;                // 基础值类型，无前缀
-using Path = std::filesystem::path;        // 基础值类型，无前缀
+using StdString = std::string;                // 标准库值类型，Std 来源前缀
+using StdPath = std::filesystem::path;        // 标准库值类型，Std 来源前缀
 
 template <typename TValue>
 using TVector = std::vector<TValue>;       // 模板别名，T 前缀
@@ -522,7 +522,7 @@ doWork();
 ```cpp
 ZAddress Address;
 SAddressRecord Record;
-TResult<Path> PathResult;
+TResult<StdPath> PathResult;
 int32 RetryCount = 0;
 ```
 
@@ -536,15 +536,15 @@ ZWindow Window;
 在无前缀类型上仍应避免变量名与类型名完全相同：
 
 ```cpp
-String Text;
-Path ConfigPath;
+StdString Text;
+StdPath ConfigPath;
 ```
 
 不推荐：
 
 ```cpp
-String String;
-Path Path;
+StdString StdString;
+StdPath StdPath;
 ```
 
 ---
@@ -608,7 +608,7 @@ class IFileSystem
 public:
     virtual ~IFileSystem() = default;
 
-    ZERO_NODISCARD virtual TResult<String> ReadTextFile(const Path& FilePath) const = 0;
+    ZERO_NODISCARD virtual TResult<StdString> ReadTextFile(const StdPath& FilePath) const = 0;
 };
 ```
 
@@ -663,7 +663,7 @@ class TResult;
 
 ```cpp
 inline constexpr int32 MaxAssetNameLength = 128;
-inline constexpr StringView DefaultManifestName = "Assets.manifest";
+inline constexpr StdStringView DefaultManifestName = "Assets.manifest";
 ```
 
 `ALL_CAPS` 仅用于宏。
@@ -687,7 +687,7 @@ class ZAssetDatabase
 `.cpp` 中可以有限使用具名 `using`：
 
 ```cpp
-using Zero::String;
+using Zero::StdString;
 using Zero::TVector;
 ```
 
@@ -709,8 +709,8 @@ using namespace fmt;
 ```cpp
 struct SAssetRecord
 {
-    String Name;
-    Path RelativePath;
+    StdString Name;
+    StdPath RelativePath;
     bool bPreload = false;
 };
 ```
@@ -719,7 +719,7 @@ struct SAssetRecord
 class ZAssetDatabase
 {
 public:
-    ZERO_NODISCARD TResult<void> Open(Path ManifestPath);
+    ZERO_NODISCARD TResult<void> Open(StdPath ManifestPath);
     ZERO_NODISCARD bool IsOpen() const noexcept;
 
 private:
@@ -734,8 +734,8 @@ private:
 class ZAssetRecord
 {
 public:
-    String Name;
-    Path RelativePath;
+    StdString Name;
+    StdPath RelativePath;
 };
 ```
 
@@ -753,7 +753,7 @@ public:
 class ZNativeFileSystem final : public IFileSystem
 {
 public:
-    TResult<String> ReadTextFile(const Path& FilePath) const override;
+    TResult<StdString> ReadTextFile(const StdPath& FilePath) const override;
 };
 ```
 
@@ -762,8 +762,8 @@ public:
 ```cpp
 struct SAssetRecord final
 {
-    String Name;
-    Path RelativePath;
+    StdString Name;
+    StdPath RelativePath;
 };
 ```
 
@@ -772,8 +772,8 @@ struct SAssetRecord final
 ```cpp
 struct SAssetRecord
 {
-    String Name;
-    Path RelativePath;
+    StdString Name;
+    StdPath RelativePath;
 };
 ```
 
@@ -827,7 +827,7 @@ class ZTextureLoader
 public:
     explicit ZTextureLoader(IFileSystem& FileSystemRef);
 
-    ZERO_NODISCARD TResult<ZTexture> LoadFromFile(const Path& FilePath);
+    ZERO_NODISCARD TResult<ZTexture> LoadFromFile(const StdPath& FilePath);
     ZERO_NODISCARD bool IsLoaded() const noexcept;
 
 private:
@@ -874,19 +874,19 @@ Database.Get("PlayerIcon");
 当必须使用非返回值输出参数时，推荐使用 `Out` 前缀。普通输入参数不使用 `In` 前缀。
 
 ```cpp
-ZERO_NODISCARD bool ParseColor(StringView Text, SColor& OutColor);
+ZERO_NODISCARD bool ParseColor(StdStringView Text, SColor& OutColor);
 ```
 
 避免：
 
 ```cpp
-bool ParseColor(StringView Text, SColor& Color);
+bool ParseColor(StdStringView Text, SColor& Color);
 ```
 
 更好的做法是直接返回 `TResult<T>`：
 
 ```cpp
-ZERO_NODISCARD TResult<SColor> ParseColor(StringView Text);
+ZERO_NODISCARD TResult<SColor> ParseColor(StdStringView Text);
 ```
 
 ---
@@ -926,9 +926,9 @@ Window.Open(EOpenMode::ReadWrite, ECreatePolicy::CreateIfMissing);
 返回错误、状态、资源句柄、查找结果的函数必须使用属性宏。公共头文件优先使用默认的 `ZERO_` 前缀宏。
 
 ```cpp
-ZERO_NODISCARD TResult<ZTexture> LoadTexture(const Path& FilePath);
-ZERO_NODISCARD bool ContainsAsset(StringView Name) const;
-ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
+ZERO_NODISCARD TResult<ZTexture> LoadTexture(const StdPath& FilePath);
+ZERO_NODISCARD bool ContainsAsset(StdStringView Name) const;
+ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StdStringView Name) const;
 ```
 
 类型本身不应被调用点忽略时，使用 `ZERO_NODISCARD_TYPE`。
@@ -936,7 +936,7 @@ ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
 ```cpp
 struct ZERO_NODISCARD_TYPE SParseToken
 {
-    String Text;
+    StdString Text;
 };
 ```
 
@@ -948,7 +948,7 @@ struct ZERO_NODISCARD_TYPE SParseToken
 #define ZERO_ENABLE_SHORT_MACROS
 #include "ZeroStyle.h"
 
-NODISCARD TResult<ZTexture> LoadTexture(const Path& FilePath);
+NODISCARD TResult<ZTexture> LoadTexture(const StdPath& FilePath);
 ```
 
 其他标准属性也统一使用 ZeroStyle 提供的属性宏，保持项目视觉风格一致。
@@ -967,9 +967,9 @@ NODISCARD TResult<ZTexture> LoadTexture(const Path& FilePath);
 好的做法：
 
 ```cpp
-ZERO_NORETURN void AbortWithMessage(StringView Message);
+ZERO_NORETURN void AbortWithMessage(StdStringView Message);
 
-void VisitToken(ZERO_MAYBE_UNUSED StringView Token);
+void VisitToken(ZERO_MAYBE_UNUSED StdStringView Token);
 
 switch (Kind)
 {
@@ -987,8 +987,8 @@ default:
 不推荐：
 
 ```cpp
-[[noreturn]] void AbortWithMessage(StringView Message);
-[[maybe_unused]] StringView Token;
+[[noreturn]] void AbortWithMessage(StdStringView Message);
+[[maybe_unused]] StdStringView Token;
 ```
 
 ---
@@ -1004,9 +1004,9 @@ default:
 
 namespace Project {
 
-using Zero::Path;
-using Zero::String;
-using Zero::StringView;
+using Zero::StdPath;
+using Zero::StdString;
+using Zero::StdStringView;
 using Zero::TOptional;
 using Zero::TResult;
 using Zero::TVector;
@@ -1026,10 +1026,10 @@ namespace Project {
 
 struct SConfig
 {
-    String Name;
+    StdString Name;
 };
 
-ZERO_NODISCARD TResult<SConfig> ParseConfig(String Text);
+ZERO_NODISCARD TResult<SConfig> ParseConfig(StdString Text);
 
 }  // namespace Project
 ```
@@ -1042,7 +1042,7 @@ ZERO_NODISCARD TResult<SConfig> ParseConfig(String Text);
 
 ```cpp
 ZERO_NODISCARD bool IsOpen() const noexcept;
-ZERO_NODISCARD const Path& ManifestPath() const noexcept;
+ZERO_NODISCARD const StdPath& ManifestPath() const noexcept;
 ```
 
 ---
@@ -1052,7 +1052,7 @@ ZERO_NODISCARD const Path& ManifestPath() const noexcept;
 函数应保持短小。超过约 50 行的函数应考虑拆分。超过约 100 行的函数通常需要重构。
 
 ```cpp
-TResult<void> ZAssetDatabase::Open(Path ManifestPath)
+TResult<void> ZAssetDatabase::Open(StdPath ManifestPath)
 {
     auto TextResult = FileSystem.ReadTextFile(ManifestPath);
 
@@ -1086,7 +1086,7 @@ const auto Record = Manifest.FindAsset(Name);
 
 if (!Record.has_value())
 {
-    return TResult<Path>::Err(MakeError(EErrorCode::AssetNotFound, "asset not found"));
+    return TResult<StdPath>::Err(MakeError(EErrorCode::AssetNotFound, "asset not found"));
 }
 ```
 
@@ -1137,7 +1137,7 @@ auto X = Factory.Create();
 项目代码默认不使用异常表达可预期错误。可预期错误通过 `TResult<T>` 或 `TOptional<T>` 返回。
 
 ```cpp
-ZERO_NODISCARD TResult<String> ReadTextFile(const Path& FilePath) const;
+ZERO_NODISCARD TResult<StdString> ReadTextFile(const StdPath& FilePath) const;
 ```
 
 异常可用于不可恢复错误、第三方库边界或程序启动阶段，但不应作为普通控制流。
@@ -1150,8 +1150,8 @@ ZERO_NODISCARD TResult<String> ReadTextFile(const Path& FilePath) const;
 
 ```cpp
 ZERO_NODISCARD TResult<ZAssetManifest> ParseManifest(
-    StringView Text,
-    const Path& ManifestPath);
+    StdStringView Text,
+    const StdPath& ManifestPath);
 ```
 
 调用方必须处理成功和失败：
@@ -1190,7 +1190,7 @@ auto AssetPath = std::move(PathResult).TakeValue();
 当失败只有“有或没有”，且不需要错误原因时，使用 `TOptional<T>`。
 
 ```cpp
-ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const;
+ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StdStringView Name) const;
 ```
 
 如果找不到不是错误，只是查询结果为空，`TOptional` 更合适。
@@ -1213,8 +1213,8 @@ enum class EErrorCode
 struct SError
 {
     EErrorCode Code;
-    String Message;
-    Path ContextPath;
+    StdString Message;
+    StdPath ContextPath;
 };
 ```
 
@@ -1400,7 +1400,7 @@ bOpen = true;
 // Returns InvalidManifest if the manifest syntax is invalid.
 // Returns FileNotFound if the file system cannot read ManifestPath.
 // On failure, the previous open manifest remains unchanged.
-ZERO_NODISCARD TResult<void> Open(Path ManifestPath);
+ZERO_NODISCARD TResult<void> Open(StdPath ManifestPath);
 ```
 
 ---
@@ -1428,7 +1428,7 @@ private:
 class ZAssetDatabase
 {
 public:
-    ZERO_NODISCARD TResult<void> Open(Path ManifestPath);
+    ZERO_NODISCARD TResult<void> Open(StdPath ManifestPath);
 };
 ```
 
@@ -1497,8 +1497,8 @@ namespace Project {
 
 struct SAssetRecord
 {
-    String Name;
-    Path RelativePath;
+    StdString Name;
+    StdPath RelativePath;
     bool bPreload = false;
 };
 
@@ -1507,20 +1507,20 @@ class IFileSystem
 public:
     virtual ~IFileSystem() = default;
 
-    ZERO_NODISCARD virtual TResult<String> ReadTextFile(const Path& FilePath) const = 0;
+    ZERO_NODISCARD virtual TResult<StdString> ReadTextFile(const StdPath& FilePath) const = 0;
 };
 
 class ZAssetManifest
 {
 public:
-    ZERO_NODISCARD bool ContainsAsset(StringView Name) const
+    ZERO_NODISCARD bool ContainsAsset(StdStringView Name) const
     {
-        return RecordsByName.contains(String(Name));
+        return RecordsByName.contains(StdString(Name));
     }
 
-    ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StringView Name) const
+    ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(StdStringView Name) const
     {
-        const auto It = RecordsByName.find(String(Name));
+        const auto It = RecordsByName.find(StdString(Name));
 
         if (It == RecordsByName.end())
         {
@@ -1539,7 +1539,7 @@ public:
                 "asset name must not be empty"));
         }
 
-        const String Name = Record.Name;
+        const StdString Name = Record.Name;
         const auto [It, bInserted] = RecordsByName.emplace(Name, std::move(Record));
         (void)It;
 
@@ -1554,7 +1554,7 @@ public:
     }
 
 private:
-    THashMap<String, SAssetRecord> RecordsByName;
+    THashMap<StdString, SAssetRecord> RecordsByName;
 };
 
 class ZAssetDatabase
@@ -1576,11 +1576,11 @@ public:
         return bOpen;
     }
 
-    ZERO_NODISCARD TResult<Path> ResolveAssetPath(StringView Name) const
+    ZERO_NODISCARD TResult<StdPath> ResolveAssetPath(StdStringView Name) const
     {
         if (!bOpen)
         {
-            return TResult<Path>::Err(MakeError(
+            return TResult<StdPath>::Err(MakeError(
                 EErrorCode::NotOpen,
                 "database is not open"));
         }
@@ -1589,18 +1589,18 @@ public:
 
         if (!Record.has_value())
         {
-            return TResult<Path>::Err(MakeError(
+            return TResult<StdPath>::Err(MakeError(
                 EErrorCode::AssetNotFound,
-                "asset not found: " + String(Name),
+                "asset not found: " + StdString(Name),
                 CurrentManifestPath));
         }
 
-        return TResult<Path>::Ok(CurrentManifestPath.parent_path() / Record->RelativePath);
+        return TResult<StdPath>::Ok(CurrentManifestPath.parent_path() / Record->RelativePath);
     }
 
 private:
     const IFileSystem& FileSystem;
-    Path CurrentManifestPath;
+    StdPath CurrentManifestPath;
     ZAssetManifest Manifest;
     bool bOpen = false;
 };
