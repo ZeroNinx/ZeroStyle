@@ -217,18 +217,21 @@ private:
 
 ### 基础别名策略
 
-基础值类型别名不加 `Z` / `S` / `T`：
+基础值类型别名不加 `Z` / `S` / `T`。
+
+来自标准库且没有额外项目语义的非模板纯 alias，添加 `Std` 来源前缀：
 
 ```cpp
 using int32 = std::int32_t;
 using uint64 = std::uint64_t;
 using float32 = float;
+
 using StdString = std::string;
 using StdStringView = std::string_view;
 using StdPath = std::filesystem::path;
 ```
 
-模板型标准库别名使用 `T` 前缀：
+模板型标准库 alias 使用 `T` 前缀，不额外添加 `Std`：
 
 ```cpp
 template <typename TValue>
@@ -240,6 +243,8 @@ using TOptional = std::optional<TValue>;
 template <typename TKey, typename TValue>
 using THashMap = std::unordered_map<TKey, TValue>;
 ```
+
+这条规则的目的是区分来源，而不是封装标准库语义。`StdString`、`StdPath` 仍然只是标准库类型 alias；`TVector<T>`、`TOptional<T>` 仍然只是模板 alias。
 
 推荐：
 
@@ -474,12 +479,15 @@ concept CStringLike = std::convertible_to<TValue, StdStringView>;
 
 类型别名分两类：
 
+- 来自标准库且没有额外项目语义的非模板纯 alias，添加 `Std` 来源前缀。
+- 模板 alias 使用 `T` 前缀，不额外添加 `Std`。
+
 ```cpp
 using StdString = std::string;                // 标准库值类型，Std 来源前缀
 using StdPath = std::filesystem::path;        // 标准库值类型，Std 来源前缀
 
 template <typename TValue>
-using TVector = std::vector<TValue>;       // 模板别名，T 前缀
+using TVector = std::vector<TValue>;          // 模板别名，T 前缀
 ```
 
 ---
