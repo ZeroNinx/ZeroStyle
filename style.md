@@ -309,15 +309,25 @@ SortIncludes: true
 
 ### 文件名
 
-文件名使用 `PascalCase`，与主要类型名一致。若文件是模块聚合头，可以使用模块名。
+文件名使用 `PascalCase`，默认按模块名或主要概念名命名。类型名前缀用于代码里的类型语义，
+不默认同步到头文件名；只有存在同名概念、接口/实现分离、平台变体等确实需要区分的情况，
+才在文件名中加入必要前缀或限定词。
 
 好的做法：
 
+```cpp
+// MyObject.h
+
+class ZMyObject
+{
+};
+```
+
 ```text
-ZAssetDatabase.h
-ZAssetDatabase.cpp
-SAssetRecord.h
-IFileSystem.h
+AssetDatabase.h    // 内部可以定义 ZAssetDatabase
+AssetDatabase.cpp
+AssetRecord.h      // 内部可以定义 SAssetRecord
+FileSystem.h       // 内部可以定义 IFileSystem
 ZeroStyle.h
 ```
 
@@ -327,6 +337,7 @@ ZeroStyle.h
 Result.h      // 模块名，内部提供 TResult
 Types.h       // 模块名，内部提供基础别名
 Concepts.h    // 模块名，内部提供 C 前缀 concepts
+IFileSystem.h // 与 FileSystem 实现头并存时，用 I 前缀区分接口头
 ```
 
 例外：第三方库、构建脚本、平台约定文件可以使用其生态惯例。
@@ -359,7 +370,7 @@ include 顺序如下：
 好的做法：
 
 ```cpp
-#include "ZAssetDatabase.h"
+#include "AssetDatabase.h"
 
 #include <cassert>
 #include <filesystem>
@@ -368,7 +379,7 @@ include 顺序如下：
 #include <fmt/format.h>
 
 #include "Core/Result.h"
-#include "IO/IFileSystem.h"
+#include "IO/FileSystem.h"
 ```
 
 ---
