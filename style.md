@@ -79,7 +79,7 @@ if (!Database.IsOpen())
 不好的做法：
 
 ```cpp
-return Database.IsOpen() ? ResolveImpl(Name) : TResult<StdPath>::Err(MakeError(EErrorCode::NotOpen, ""));
+return Database.IsOpen() ? GetAssetPathImpl(Name) : TResult<StdPath>::Err(MakeError(EErrorCode::NotOpen, ""));
 ```
 
 三目表达式、模板元编程、宏技巧和高度压缩的链式调用都应谨慎使用。
@@ -93,7 +93,7 @@ return Database.IsOpen() ? ResolveImpl(Name) : TResult<StdPath>::Err(MakeError(E
 好的做法：
 
 ```cpp
-ZERO_NODISCARD TResult<StdPath> ResolveAssetPath(StdStringView Name) const;
+ZERO_NODISCARD TResult<StdPath> GetAssetPath(StdStringView Name) const;
 ```
 
 不好的做法：
@@ -102,7 +102,7 @@ ZERO_NODISCARD TResult<StdPath> ResolveAssetPath(StdStringView Name) const;
 StdPath Get(StdStringView Name) const;
 ```
 
-`ResolveAssetPath` 比 `Get` 更清楚，`TResult<T>` 比隐藏失败条件更清楚，`ZERO_NODISCARD` 能提醒调用者处理结果。
+`GetAssetPath` 比 `Get` 更清楚，`TResult<T>` 比隐藏失败条件更清楚，`ZERO_NODISCARD` 能提醒调用者处理结果。
 
 ---
 
@@ -436,9 +436,9 @@ void ZAssetDatabase::Close()
 推荐行宽不超过 100 列。复杂函数签名应换行。
 
 ```cpp
-ZERO_NODISCARD TResult<StdPath> ResolveAssetPath(
+ZERO_NODISCARD TResult<StdPath> GetAssetPath(
     StdStringView Name,
-    EResolveFlags Flags) const;
+    EAssetPathPolicy Policy) const;
 ```
 
 ---
@@ -505,7 +505,7 @@ using TVector = std::vector<TValue>;          // 模板别名，T 前缀
 
 ### 函数名
 
-函数名使用 `PascalCase`，通常使用动词或动词短语。
+函数名使用 `PascalCase`，必须使用动词或动词短语。项目自有函数不得只用名词命名。
 
 好的做法：
 
@@ -515,7 +515,7 @@ Close();
 Reload();
 FindAsset();
 ContainsAsset();
-ResolveAssetPath();
+GetAssetPath();
 ```
 
 不好的做法：
@@ -872,7 +872,7 @@ API 名称应当能从调用点读出含义。
 Database.Open("Game/Assets.manifest");
 Database.Reload();
 Database.ContainsAsset("PlayerIcon");
-Database.ResolveAssetPath("PlayerIcon");
+Database.GetAssetPath("PlayerIcon");
 ```
 
 不好的做法：
@@ -884,7 +884,65 @@ Database.Check("PlayerIcon");
 Database.Get("PlayerIcon");
 ```
 
-`Get`、`Set`、`Process`、`Handle`、`Execute` 等泛化名称应谨慎使用。
+不能脱离所属类型机械判断一个动词是否清楚。应按完整调用表达式判断：对象已经明确职责时可以使用简洁动词；对象语义宽泛时，函数名必须补足动作对象或结果。
+
+```cpp
+Executor.Execute();
+Workflow.Execute();
+DependencyResolver.Resolve(Reference);
+```
+
+这里 `Executor`、`Workflow` 和 `DependencyResolver` 已经提供了动作所需的上下文，重复扩写函数名不会增加信息。相反，`Manager.Execute()`、`Service.Process()` 或 `Object.Handle()` 无法说明具体意图。
+
+---
+
+### 函数名必须表达意图动作
+
+函数名首先要让调用点可读，其次要明确表达调用者要求对象执行的动作。项目自有成员函数必须以动词或动词短语命名，不得只使用名词。名词用于类型、变量和数据成员；函数必须从名称上即可与数据成员区分。判断语义时必须阅读完整的 `对象.函数(参数)`，不能只检查函数名中的单个词。
+
+好的做法：
+
+```cpp
+Database.GetManifest();
+Database.FindAsset("PlayerIcon");
+Database.AddAsset(Record);
+Database.Reload();
+Window.GetTitle();
+```
+
+不好的做法：
+
+```cpp
+Database.Manifest();
+Database.Asset("PlayerIcon");
+Window.Title();
+```
+
+`Get` 可以作为明确动词使用，但必须带上被获取的对象。`GetManifest` 能直接表达意图，单独的 `Get` 仍然缺少语义。
+
+函数名描述调用者的意图和可观察行为，不描述为了完成该行为而采用的内部实现。存储介质、缓存层、序列化格式和临时数据结构只有在它们本身就是 API 契约时才应出现在名称中。
+
+好的做法：
+
+```cpp
+AssetCatalog.GetManifest();
+AssetRepository.FindAsset(AssetId);
+Config.Save();
+TextFile.ReadText();  // 文件及文本格式本身就是该类型的契约
+```
+
+不好的做法：
+
+```cpp
+AssetCatalog.ReadManifestFromDisk();
+AssetCatalog.GetNextManifestLine();
+AssetRepository.FindAssetInCache(AssetId);
+Config.SerializeJsonAndWriteFile();
+```
+
+即使当前实现使用磁盘、特定序列化格式或缓存，高层 API 仍应保持 `GetManifest`、`FindAsset`、`Save` 等意图名称。这样更换内部实现时不需要修改调用方，也不会迫使阅读者先理解实现细节。
+
+布尔查询通常使用 `Is...`、`Has...`、`Can...` 或 `Should...`；集合修改通常使用 `Add...`、`Append...`、`Remove...` 或 `Update...`；创建、解析、查找和转换通常使用 `Create...`、`Parse...`、`Find...`、`Convert...` 等动词。这些是帮助表达意图的常用词，不是允许或禁止词表。`Executor.Execute()`、`Workflow.Execute()` 和 `DependencyResolver.Resolve(Reference)` 都是合格接口；相同动词放在无法提供足够上下文的类型上则需要补充语义。
 
 ---
 
@@ -1061,7 +1119,7 @@ ZERO_NODISCARD TResult<SConfig> ParseConfig(StdString Text);
 
 ```cpp
 ZERO_NODISCARD bool IsOpen() const noexcept;
-ZERO_NODISCARD const StdPath& ManifestPath() const noexcept;
+ZERO_NODISCARD const StdPath& GetManifestPath() const noexcept;
 ```
 
 ---
@@ -1134,7 +1192,7 @@ struct STextureInfo
 好的做法：
 
 ```cpp
-auto PathResult = Database.ResolveAssetPath("PlayerIcon");
+auto PathResult = Database.GetAssetPath("PlayerIcon");
 const auto It = RecordsByName.find(Name);
 ```
 
@@ -1193,7 +1251,7 @@ ZAssetManifest Manifest = std::move(ManifestResult).TakeValue();
 若项目启用 C++23 且标准库提供 `std::expected`，`TResult<TValue, TError>` 会在内部使用 `std::expected` 存储；公开 API 仍保持 ZeroStyle 的 PascalCase 接口，避免 C++20 与 C++23 下调用方式不一致。
 
 ```cpp
-auto PathResult = Database.ResolveAssetPath("PlayerIcon");
+auto PathResult = Database.GetAssetPath("PlayerIcon");
 
 if (PathResult.IsErr())
 {
@@ -1595,7 +1653,7 @@ public:
         return bOpen;
     }
 
-    ZERO_NODISCARD TResult<StdPath> ResolveAssetPath(StdStringView Name) const
+    ZERO_NODISCARD TResult<StdPath> GetAssetPath(StdStringView Name) const
     {
         if (!bOpen)
         {
