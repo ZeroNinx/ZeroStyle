@@ -477,6 +477,31 @@ return TResult<StdPath>::Ok(BasePath / Record->RelativePath);
 
 项目自有类型使用前缀加 `PascalCase`。
 
+类型名必须回答“它是什么”，并以明确的名词作为核心词和结尾。用途、状态、范围等限定词放在核心名词之前，不得使用动词、形容词或含义不完整的动作词充当类型名。
+
+好的做法：
+
+```cpp
+class ZAssetDatabase;
+class ZTextureLoader;
+class ZBuildExecutor;
+struct SParseResult;
+struct SWindowSettings;
+class IFileSystem;
+```
+
+不好的做法：
+
+```cpp
+class ZLoad;
+class ZProcess;
+class ZManager;
+struct SParsed;
+struct SFill;
+```
+
+`Loader`、`Executor`、`Resolver`、`Manager` 等施事名词可以作为结尾，但前面的限定词必须说明它管理或执行什么。`ZBuildExecutor` 能表达具体对象，单独的 `ZExecutor` 或 `ZManager` 仍然缺少语义。对既可作名词又常被理解为动作的词，应优先换成无歧义的领域名词，例如使用 `SLoadResult`，而不是 `SLoad`。
+
 ```cpp
 class ZAssetDatabase;
 struct SAssetRecord;
