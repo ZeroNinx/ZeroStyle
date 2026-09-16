@@ -1472,38 +1472,87 @@ ZERO_NODISCARD TOptional<SAssetRecord> FindAsset(TName&& Name) const;
 
 ## 注释与文档
 
-### 注释解释原因，不重复代码
+### 头文件声明使用 JavaDoc 风格
+
+头文件中的类、结构体、函数和成员都应使用 `/** ... */` JavaDoc 风格注释。注释应提供理解接口所需的信息，内容丰富但不冗长，使读者无需查看实现文件即可理解声明。
+
+- 类和结构体描述职责、作用以及必要的协作边界；
+- 函数描述对调用者可见的行为，不描述内部算法、执行步骤或实现手段；
+- 成员描述所保存信息的含义，必要时注明单位、所有权、有效范围或空值语义；
+- 失败条件、状态变化、所有权和线程安全会影响调用方式时，应在对应声明处说明；
+- `@param`、`@return` 等标签只在能补充语义时使用，不逐字复述参数名或返回类型；
+- 注释通常使用一到数句；明显重复类型名、函数名或成员名的文字应删除。
+
+```cpp
+/** 管理当前已发布的资源清单，并保证失败时保留原有状态。 */
+class ZAssetDatabase
+{
+public:
+    /**
+     * 打开并验证资源清单。
+     *
+     * 读取或解析失败时返回错误，当前已打开的清单保持不变。
+     *
+     * @param ManifestPath 待读取的清单路径。
+     */
+    ZERO_NODISCARD TResult<void> Open(const StdPath& ManifestPath);
+
+private:
+    /** 当前已经验证并对外可见的资源清单。 */
+    TOptional<ZAssetManifest> CurrentManifest;
+};
+```
+
+下面的函数注释暴露了实现方式，不适合作为头文件 API 文档：
+
+```cpp
+/** 先读取文件到字符串，再逐行解析并交换 CurrentManifest。 */
+ZERO_NODISCARD TResult<void> Open(const StdPath& ManifestPath);
+```
+
+---
+
+### 实现代码中的注释
+
+函数实现应首先通过命名、分支结构、局部变量和适当的函数拆分保证可读性。简单实现可以不写注释。
+
+实现步骤较多时，可以按逻辑阶段分组添加普通 `//` 注释。实现注释说明当前代码块要完成的步骤、约束或设计意图，不重复函数的对外行为，也不逐句翻译紧随其后的代码。
 
 好的做法：
 
 ```cpp
-// Keep the old manifest active until parsing succeeds so Reload() is atomic.
+// 保留旧清单直到新清单完成验证，使失败路径不改变当前可见状态。
 ZAssetManifest NewManifest = std::move(ManifestResult).TakeValue();
+```
+
+```cpp
+// 先准备完整的新状态；所有可能失败的操作都必须发生在发布之前。
+auto Prepared = PrepareState(Input);
+if (Prepared.IsErr())
+{
+    return Prepared;
+}
+
+// 发布阶段只移动已准备对象，不再执行可能失败的工作。
+Commit(std::move(Prepared).TakeValue());
 ```
 
 不好的做法：
 
 ```cpp
-// Set bOpen to true.
+// 将 bOpen 设置为 true。
 bOpen = true;
 ```
 
-注释应解释“为什么”，而不是复述“做了什么”。
-
----
-
-### 公共 API 文档
-
-复杂公共 API 应说明失败条件、所有权和线程安全。
-
 ```cpp
-// Opens and parses an asset manifest.
-//
-// Returns InvalidManifest if the manifest syntax is invalid.
-// Returns FileNotFound if the file system cannot read ManifestPath.
-// On failure, the previous open manifest remains unchanged.
-ZERO_NODISCARD TResult<void> Open(StdPath ManifestPath);
+// 打开并解析资源清单。
+TResult<void> ZAssetDatabase::Open(const StdPath& ManifestPath)
+{
+    // ...
+}
 ```
+
+第二个例子只是重复函数声明已经说明的行为，没有帮助读者理解实现。
 
 ---
 
@@ -1512,24 +1561,31 @@ ZERO_NODISCARD TResult<void> Open(StdPath ManifestPath);
 类声明处应注明线程安全性；函数签名可进一步细化。
 
 ```cpp
-// Thread-safe.
+/** 线程安全的事件发布与订阅服务。 */
 class ZEventBus
 {
 public:
+    /** 向当前订阅者发布事件。 */
     void Publish(SEvent Event) ZERO_EXCLUDES(Mutex);
+
+    /** 注册后续事件的处理器。 */
     void Subscribe(ZEventHandler Handler) ZERO_EXCLUDES(Mutex);
 
 private:
+    /** 保护处理器集合的互斥量。 */
     mutable std::mutex Mutex;
+
+    /** 当前已经注册的事件处理器。 */
     TVector<ZEventHandler> Handlers ZERO_GUARDED_BY(Mutex);
 };
 ```
 
 ```cpp
-// Not thread-safe. External synchronization required.
+/** 非线程安全的资源数据库；并发访问需要调用方同步。 */
 class ZAssetDatabase
 {
 public:
+    /** 打开并验证资源清单；调用方必须保证没有并发访问。 */
     ZERO_NODISCARD TResult<void> Open(StdPath ManifestPath);
 };
 ```
